@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 import re
 
-from collection_utils import to_namespace
+from sj_utils.collection_utils import to_namespace
 
 
 load_dotenv()

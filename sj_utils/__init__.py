@@ -6,11 +6,13 @@ from . import audio_utils
 from . import collection_utils
 from . import statistics_utils
 from . import string_utils
+from . import decorator_utils
 
 __all__ = [
     "audio_utils",
     "collection_utils",
     "statistics_utils",
     "string_utils",
+    "decorator_utils",
     "file",
 ]
