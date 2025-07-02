@@ -41,3 +41,9 @@ def to_namespace(d: Any):
         return [to_namespace(i) for i in d]
     else:
         return d
+
+
+__all__ = [
+    "SafetyDict",
+    "to_namespace",
+]

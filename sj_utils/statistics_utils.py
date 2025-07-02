@@ -26,3 +26,8 @@ def update_mean_std(
     )
 
     return updated_mean, updated_std
+
+
+__all__ = [
+    "update_mean_std",
+]

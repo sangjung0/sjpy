@@ -12,3 +12,6 @@ def singleton(cls):
         return implementation
 
     return get_instance
+
+
+__all__ = ["singleton"]
