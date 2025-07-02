@@ -1,4 +1,5 @@
 import re
+import unicodedata
 
 
 def camel_to_snake(name: str) -> str:
@@ -6,6 +7,16 @@ def camel_to_snake(name: str) -> str:
     return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
 
+def normalize_text_only_en(text: str) -> str:
+    text = unicodedata.normalize("NFKD", text)
+    text = re.sub(r"[^\w\s]", "", text)
+    text = re.sub(r"[^a-zA-Z0-9\s]", "", text)
+    text = re.sub(r"\s+", " ", text).strip()
+
+    return text
+
+
 __all__ = [
     "camel_to_snake",
+    "normalize_text_only_en",
 ]
