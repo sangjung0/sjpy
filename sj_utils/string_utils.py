@@ -16,7 +16,16 @@ def normalize_text_only_en(text: str) -> str:
     return text
 
 
+def remove_spaces_and_symbols(text: str) -> str:
+    return "".join(
+        ch
+        for ch in text
+        if not unicodedata.category(ch).startswith(("P", "S")) and not ch.isspace()
+    )
+
+
 __all__ = [
     "camel_to_snake",
     "normalize_text_only_en",
+    "remove_spaces_and_symbols",
 ]
