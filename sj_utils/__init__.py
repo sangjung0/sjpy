@@ -7,6 +7,7 @@ from . import collection_utils
 from . import statistics_utils
 from . import string_utils
 from . import decorator_utils
+from . import typing
 
 __all__ = [
     "audio_utils",
@@ -14,5 +15,6 @@ __all__ = [
     "statistics_utils",
     "string_utils",
     "decorator_utils",
+    "typing",
     "file",
 ]
