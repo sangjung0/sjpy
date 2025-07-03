@@ -6,7 +6,11 @@ def generate_empty_chunk(dtype=np.float32) -> np.ndarray:
 
 
 def segment_audio(
-    audio: np.ndarray, mean: int = 48000, std: int = 400, ratio: float = 0.1
+    audio: np.ndarray,
+    mean: int = 48000,
+    std: int = 400,
+    ratio: float = 0.1,
+    rng: np.random.Generator | np.random.RandomState = np.random,
 ):
     min_len = int(mean * (1 - ratio))
     max_len = int(mean * (1 + ratio))
@@ -15,7 +19,7 @@ def segment_audio(
 
     start = 0
     while start < length:
-        read_len = np.clip(int(np.random.normal(mean, std)), min_len, max_len)
+        read_len = np.clip(int(rng.normal(mean, std)), min_len, max_len)
         end = min(start + read_len, length)
         segments.append(audio[start:end])
         start = end
