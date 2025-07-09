@@ -20,3 +20,26 @@ def deprecated(
         return wrapper
 
     return decorator
+
+
+def override(func):
+    """Decorator to indicate that a method is overriding a method from a superclass.
+
+    Args:
+        func (callable): The function to be marked as an override.
+
+    Returns:
+        callable: The wrapped function.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+__all__ = [
+    "deprecated",
+    "override",
+]
