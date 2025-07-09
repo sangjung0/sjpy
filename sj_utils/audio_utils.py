@@ -1,4 +1,8 @@
 import numpy as np
+import ffmpeg
+import io
+
+from scipy.io import wavfile
 
 
 def generate_empty_chunk(dtype=np.float32) -> np.ndarray:
@@ -27,7 +31,24 @@ def segment_audio(
     return segments
 
 
+def load_audio_from_mp4(mp4_path: str, sr: int = 16000) -> tuple[np.ndarray, int]:
+
+    out, _ = (
+        ffmpeg.input(mp4_path)
+        .output("pipe:", format="wav", ac=1, ar=sr)
+        .run(capture_stdout=True, capture_stderr=True)
+    )
+
+    sample_rate, waveform = wavfile.read(io.BytesIO(out))
+
+    if waveform.dtype != np.float32:
+        waveform = waveform.astype(np.float32) / np.iinfo(waveform.dtype).max
+
+    return waveform, sample_rate
+
+
 __all__ = [
     "generate_empty_chunk",
     "segment_audio",
+    "load_audio_from_mp4",
 ]
