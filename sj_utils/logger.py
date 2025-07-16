@@ -11,11 +11,13 @@ def generate(
     file_log_level: int = logging.DEBUG,
 ):
     logger = logging.getLogger(name)
-    logger.setLevel(level)
+    logger.setLevel(min(level, file_log_level))
     logger.propagate = False
 
     if not any(isinstance(h, RichHandler) for h in logger.handlers):
-        logger.addHandler(RichHandler())
+        console_handler = RichHandler()
+        console_handler.setLevel(level)
+        logger.addHandler(console_handler)
 
     if path is not None:
         file_path = path / f"{name}.log"
@@ -24,6 +26,7 @@ def generate(
                 file_path
             ):
                 handler.setLevel(file_log_level)
+                break
         else:
             file_path.parent.mkdir(parents=True, exist_ok=True)
             file_handler = logging.FileHandler(file_path, encoding="utf-8")
