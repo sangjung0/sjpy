@@ -34,3 +34,6 @@ def generate(
             logger.addHandler(file_handler)
 
     return logger
+
+
+__all__ = ["generate"]

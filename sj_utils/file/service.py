@@ -1,31 +1,11 @@
-from pathlib import Path
-import yaml
-from dotenv import load_dotenv
 import os
 import re
 
-from sj_utils.collection_utils import to_namespace
-
-
-load_dotenv()
-
-
-class ReadYaml:
-    def __init__(self, path: Path) -> None:
-        super().__init__()
-
-        self.path = path
-        self.dict = self.__load_yaml()
-        self.namespace = to_namespace(self.dict)
-
-    def __load_yaml(self) -> dict:
-        with open(self.path, "r", encoding="utf-8") as file:
-            config = yaml.safe_load(file)
-        replace(config)
-        return config
-
+from dotenv import load_dotenv
 
 PATTERN = re.compile(r"\$\{(\w+)(?::([^}]*))?\}")
+
+load_dotenv()
 
 
 def replace(d: dict):
@@ -44,3 +24,6 @@ def replace(d: dict):
 
 def replacer(match: re.Match[str]) -> str:
     return os.getenv(match.group(1), match.group(2))
+
+
+__all__ = ["replace", "replacer"]

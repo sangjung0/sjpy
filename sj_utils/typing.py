@@ -20,3 +20,23 @@ def deprecated(
         return wrapper
 
     return decorator
+
+
+def override(func):
+    """Decorator to mark a function as an override.
+
+    Args:
+        func (Callable): The function to override.
+
+    Returns:
+        Callable: The wrapped function.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+__all__ = ["deprecated", "override"]
