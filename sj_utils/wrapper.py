@@ -1,121 +1,101 @@
-def make_float_like(cls):
-    def _binary(method_name):
-        def method(self, other):
-            return getattr(float(self.value), method_name)(other)
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
-        return method
+import operator
+from functools import wraps
+from typing import Any, Callable, Dict, Type
 
-    def _reverse_binary(method_name):
-        def method(self, other):
-            return getattr(other, method_name)(float(self.value))
+if TYPE_CHECKING:
+    pass
 
-        return method
+# NOTE AI가 만듬 믿어선 안돼~!
 
-    def _unary(method_name):
-        def method(self):
-            return getattr(float(self.value), method_name)()
+_BINARY_OPS: Dict[str, Callable[[Any, Any], Any]] = {
+    "__add__": operator.add,
+    "__sub__": operator.sub,
+    "__mul__": operator.mul,
+    "__truediv__": operator.truediv,
+    "__floordiv__": operator.floordiv,
+    "__mod__": operator.mod,
+    "__pow__": operator.pow,
+    "__and__": operator.and_,
+    "__or__": operator.or_,
+    "__xor__": operator.xor,
+}
 
-        return method
+_UNARY_OPS: Dict[str, Callable[[Any], Any]] = {
+    "__neg__": operator.neg,
+    "__pos__": operator.pos,
+    "__abs__": operator.abs,
+    "__invert__": operator.invert,
+}
 
-    bin_ops = [
-        "__add__",
-        "__sub__",
-        "__mul__",
-        "__truediv__",
-        "__floordiv__",
-        "__mod__",
-        "__pow__",
-    ]
-    rbin_ops = [
-        "__radd__",
-        "__rsub__",
-        "__rmul__",
-        "__rtruediv__",
-        "__rfloordiv__",
-        "__rmod__",
-        "__rpow__",
-    ]
-    unary_ops = ["__neg__", "__pos__", "__abs__"]
-    cmp_ops = ["__lt__", "__le__", "__gt__", "__ge__", "__eq__", "__ne__"]
+_CMP_OPS: Dict[str, Callable[[Any, Any], bool]] = {
+    "__lt__": operator.lt,
+    "__le__": operator.le,
+    "__gt__": operator.gt,
+    "__ge__": operator.ge,
+    "__eq__": operator.eq,
+    "__ne__": operator.ne,
+}
 
-    for op in bin_ops:
-        setattr(cls, op, _binary(op))
-    for op in rbin_ops:
-        setattr(cls, op, _reverse_binary(op))
-    for op in unary_ops:
-        setattr(cls, op, _unary(op))
-    for op in cmp_ops:
-        setattr(cls, op, _binary(op))
 
+def _make_numeric(cls: Type, caster: Callable[[Any], Any], *, is_int: bool) -> Type:
+    """
+    `cls.value`(원시 값)을 `caster`로 변환해 모든 숫자 연산을
+    프록시하도록 메서드를 주입한다.
+    """
+
+    # ---------- 2-항 연산 ----------
+    for name, op in _BINARY_OPS.items():
+
+        @wraps(op)
+        def f(self, other, _op=op):  # _op 디폴트 인수 trick으로 late-binding 방지
+            return _op(caster(self.value), other)
+
+        @wraps(op)
+        def rf(self, other, _op=op):
+            return _op(other, caster(self.value))
+
+        setattr(cls, name, f)
+        setattr(cls, f"__r{name[2:]}", rf)  # __add__ -> __radd__
+
+    # ---------- 단항 연산 ----------
+    for name, op in _UNARY_OPS.items():
+
+        @wraps(op)
+        def f(self, _op=op):
+            return _op(caster(self.value))
+
+        setattr(cls, name, f)
+
+    # ---------- 비교 연산 ----------
+    for name, op in _CMP_OPS.items():
+
+        @wraps(op)
+        def f(self, other, _op=op):
+            return _op(caster(self.value), other)
+
+        setattr(cls, name, f)
+
+    # ---------- 기본 특수 메서드 ----------
+    cls.__int__   = lambda self: int(self.value)
     cls.__float__ = lambda self: float(self.value)
-    cls.__int__ = lambda self: int(self.value)
-    cls.__repr__ = lambda self: f"{cls.__name__}({self.value})"
+    if is_int:
+        cls.__index__ = lambda self: int(self.value)  # range(), list[x] 등에 필요
+    cls.__repr__  = lambda self: f"{cls.__class__.__name__}({self.value})"
 
     return cls
 
 
-def make_int_like(cls):
-    def _binary(method_name):
-        def method(self, other):
-            return getattr(int(self.value), method_name)(other)
+def make_int_like(cls: Type) -> Type:
+    """`int`처럼 동작하도록 메서드를 주입한다."""
+    return _make_numeric(cls, int, is_int=True)
 
-        return method
 
-    def _reverse_binary(method_name):
-        def method(self, other):
-            return getattr(other, method_name)(int(self.value))
-
-        return method
-
-    def _unary(method_name):
-        def method(self):
-            return getattr(int(self.value), method_name)()
-
-        return method
-
-    bin_ops = [
-        "__add__",
-        "__sub__",
-        "__mul__",
-        "__truediv__",
-        "__floordiv__",
-        "__mod__",
-        "__pow__",
-        "__and__",
-        "__or__",
-        "__xor__",
-    ]
-    rbin_ops = [
-        "__radd__",
-        "__rsub__",
-        "__rmul__",
-        "__rtruediv__",
-        "__rfloordiv__",
-        "__rmod__",
-        "__rpow__",
-        "__rand__",
-        "__ror__",
-        "__rxor__",
-    ]
-    unary_ops = ["__neg__", "__pos__", "__abs__", "__invert__"]
-    cmp_ops = ["__lt__", "__le__", "__gt__", "__ge__", "__eq__", "__ne__"]
-
-    for op in bin_ops:
-        setattr(cls, op, _binary(op))
-    for op in rbin_ops:
-        setattr(cls, op, _reverse_binary(op))
-    for op in unary_ops:
-        setattr(cls, op, _unary(op))
-    for op in cmp_ops:
-        setattr(cls, op, _binary(op))
-
-    cls.__int__ = lambda self: int(self.value)
-    cls.__float__ = lambda self: float(self.value)
-    cls.__index__ = lambda self: int(self.value)  # for range(), list[a] 등
-    cls.__repr__ = lambda self: f"{cls.__name__}({self.value})"
-
-    return cls
-
+def make_float_like(cls: Type) -> Type:
+    """`float`처럼 동작하도록 메서드를 주입한다."""
+    return _make_numeric(cls, float, is_int=False)
 
 __all__ = [
     "make_float_like",
