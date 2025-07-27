@@ -47,7 +47,7 @@ def load_yaml(filepath: Path) -> tuple[object, dict]:
     return metadata, data["data"]
 
 
-def read_yaml(path: Path):
+def read_yaml(path: Path) -> dict:
     if not path.exists():
         raise FileNotFoundError(f"File {path} does not exist.")
     with path.open("r", encoding="utf-8") as file:
