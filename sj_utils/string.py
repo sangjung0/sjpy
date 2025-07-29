@@ -9,7 +9,6 @@ def camel_to_snake(name: str) -> str:
 
 def normalize_text_only_en(text: str) -> str:
     text = unicodedata.normalize("NFKD", text)
-    text = re.sub(r"[^\w\s]", "", text)
     text = re.sub(r"[^a-zA-Z0-9\s]", "", text)
     text = re.sub(r"\s+", " ", text).strip()
 
