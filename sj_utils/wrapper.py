@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import operator
+
 from functools import wraps
 from typing import Any, Callable, Dict, Type
 
@@ -79,11 +80,11 @@ def _make_numeric(cls: Type, caster: Callable[[Any], Any], *, is_int: bool) -> T
         setattr(cls, name, f)
 
     # ---------- 기본 특수 메서드 ----------
-    cls.__int__   = lambda self: int(self.value)
+    cls.__int__ = lambda self: int(self.value)
     cls.__float__ = lambda self: float(self.value)
     if is_int:
         cls.__index__ = lambda self: int(self.value)  # range(), list[x] 등에 필요
-    cls.__repr__  = lambda self: f"{cls.__class__.__name__}({self.value})"
+    cls.__repr__ = lambda self: f"{cls.__class__.__name__}({self.value})"
 
     return cls
 
@@ -96,6 +97,7 @@ def make_int_like(cls: Type) -> Type:
 def make_float_like(cls: Type) -> Type:
     """`float`처럼 동작하도록 메서드를 주입한다."""
     return _make_numeric(cls, float, is_int=False)
+
 
 __all__ = [
     "make_float_like",

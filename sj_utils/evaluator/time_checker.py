@@ -18,3 +18,6 @@ class TimeChecker:
 
     def metric(self):
         return summarize_distribution(self.__times)
+
+
+__all__ = ["TimeChecker"]
