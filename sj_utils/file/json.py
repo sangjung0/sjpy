@@ -47,6 +47,7 @@ def load_json(filepath: Path) -> tuple[object, dict]:
 
 
 def read_json(path: Path):
+    # 왜만들었지
     if not path.exists():
         raise FileNotFoundError(f"File {path} does not exist.")
     return json.loads(path.read_text(encoding="utf-8"))

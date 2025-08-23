@@ -1,6 +1,7 @@
-import numpy as np
 import ffmpeg
 import io
+import warnings
+import numpy as np
 
 from scipy.io import wavfile
 
@@ -29,18 +30,43 @@ def segment_audio(
     return segments
 
 
-def load_audio_from_mp4(mp4_path: str, sr: int = 16000) -> tuple[np.ndarray, int]:
+def load_audio_from_mp4(
+    mp4_path: str, sr: int = 16000, dtype: type | np.dtype = np.float32
+) -> tuple[np.ndarray, int]:
 
     out, _ = (
         ffmpeg.input(mp4_path)
-        .output("pipe:", format="wav", ac=1, ar=sr)
+        .output("pipe:", format="wav", ac=1, ar=sr)  # mono, target sr
         .run(capture_stdout=True, capture_stderr=True)
     )
 
-    sample_rate, waveform = wavfile.read(io.BytesIO(out))
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=wavfile.WavFileWarning)
+        sample_rate, waveform = wavfile.read(io.BytesIO(out))  # may return int or float
 
-    if waveform.dtype != np.float32:
-        waveform = waveform.astype(np.float32) / np.iinfo(waveform.dtype).max
+    desired = np.dtype(dtype)
+
+    if np.issubdtype(desired, np.floating):
+        if np.issubdtype(waveform.dtype, np.integer):
+            info = np.iinfo(waveform.dtype)
+            scale = max(abs(info.min), info.max)
+            waveform = waveform.astype(np.float32) / float(scale)
+        elif not np.issubdtype(waveform.dtype, np.floating):
+            waveform = waveform.astype(np.float32)
+        waveform = waveform.astype(desired, copy=False)
+
+    elif np.issubdtype(desired, np.integer):
+        if np.issubdtype(waveform.dtype, np.floating):
+            info = np.iinfo(desired)
+            scale = float(info.max)
+            waveform = np.clip(waveform, -1.0, 1.0)
+            waveform = (waveform * scale).round().astype(desired)
+        else:
+            dst_info = np.iinfo(desired)
+            waveform = np.clip(waveform, dst_info.min, dst_info.max).astype(desired)
+
+    else:
+        waveform = waveform.astype(desired)
 
     return waveform, sample_rate
 
@@ -50,3 +76,4 @@ __all__ = [
     "segment_audio",
     "load_audio_from_mp4",
 ]
+
