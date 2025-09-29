@@ -13,8 +13,8 @@ def generate_empty_chunk(dtype=np.float32) -> np.ndarray:
 def segment_audio(
     audio: np.ndarray,
     mean: int = 48000,
-    std: int = 400,
-    max_div: int = 4800,
+    std: int = 0,
+    max_div: int = 0,
     rng: np.random.Generator | np.random.RandomState = np.random,
 ):
     segments = []
