@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from sj_utils.statistics import summarize_distribution
 
 
-def compute_average_lagging(coverage: np.ndarray, L: float):
+def compute_average_lagging(coverage: np.ndarray, L: float) -> float | None:
     coverage = np.asarray(coverage, dtype=np.float32)
     if coverage.ndim != 1:
         raise ValueError("coverage must be a 1-dimensional array")
@@ -20,6 +20,9 @@ def compute_average_lagging(coverage: np.ndarray, L: float):
         raise ValueError("all elements in coverage must be less than or equal to L")
     if not np.all(coverage[1:] >= coverage[:-1]):  # 단조 비감소
         raise ValueError("coverage must be a non-decreasing sequence")
+
+    if coverage.size == 0:
+        return None
 
     J = coverage.size
     idx = int(np.searchsorted(coverage, L, side="left"))
@@ -28,7 +31,7 @@ def compute_average_lagging(coverage: np.ndarray, L: float):
     return float(np.mean(coverage[:tau] - (j - 1) * (L / J)))
 
 
-def compute_average_proportion(coverage: np.ndarray, L: float):
+def compute_average_proportion(coverage: np.ndarray, L: float) -> float | None:
     coverage = np.asarray(coverage, dtype=np.float32)
     if coverage.ndim != 1:
         raise ValueError("coverage must be a 1-dimensional array")
@@ -42,6 +45,9 @@ def compute_average_proportion(coverage: np.ndarray, L: float):
         raise ValueError("all elements in coverage must be less than or equal to L")
     if not np.all(coverage[1:] >= coverage[:-1]):  # 단조 비감소
         raise ValueError("coverage must be a non-decreasing sequence")
+
+    if coverage.size == 0:
+        return None
 
     J = coverage.size
     ap = float(coverage.sum() / (L * J))
@@ -92,11 +98,23 @@ class TimeEvaluatorSummary:
         self.aps.append(evaluator.get_avg_proportion())
 
     def metric(self):
+        als = [x for x in self.als if x is not None]
+        aps = [x for x in self.aps if x is not None]
+        average_lagging_stats = summarize_distribution(als)
+        average_proportion_stats = summarize_distribution(aps)
+        average_lagging_stats["count_null"] = len(self.als) - len(als)
+        average_proportion_stats["count_null"] = len(self.aps) - len(aps)
         return {
-            "average_lagging_stats": summarize_distribution(self.als),
-            "average_proportion_stats": summarize_distribution(self.aps),
+            "average_lagging_stats": average_lagging_stats,
+            "average_proportion_stats": average_proportion_stats,
             "time_stats": summarize_distribution(self.times),
         }
 
 
-__all__ = ["compute_average_lagging", "compute_average_proportion", "TimeEvaluator", "TimeEvaluatorSummary"]
+__all__ = [
+    "compute_average_lagging",
+    "compute_average_proportion",
+    "TimeEvaluator",
+    "TimeEvaluatorSummary",
+]
+
