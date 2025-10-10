@@ -20,9 +20,6 @@ class SafetyDict(dict):
             print(f"Key '{key}' not found in SafetyDict. Returning default value.")
         return super().get(key, self.__DEFAULT_VALUE)
 
-    def __setitem__(self, key, value):
-        raise NotImplementedError("SafetyDict is read-only")
-
     def __upload(self, d: dict):
         default = d["default"] if "default" in d else None
         bucket = SafetyDict(default_value=default)
