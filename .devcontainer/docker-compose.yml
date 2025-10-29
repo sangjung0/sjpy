@@ -1,0 +1,35 @@
+name: ${CONTAINER_NAME}
+services:
+    dev:
+        shm_size: 16gb
+        build:
+            context: ..
+            dockerfile: .devcontainer/Dockerfile
+            args:
+                CONTAINER_USER: ${CONTAINER_USER}
+                CONTAINER_UID: ${CONTAINER_UID}
+                CONTAINER_HOME: ${CONTAINER_HOME}
+                CONTAINER_WORK_DIR: ${CONTAINER_WORK_DIR}
+                CONTAINER_UV_GROUP: ${CONTAINER_UV_GROUP}
+        environment:
+            CONTAINER_USER: ${CONTAINER_USER}
+            CONTAINER_UID: ${CONTAINER_UID}
+            CONTAINER_HOME: ${CONTAINER_HOME}
+            CONTAINER_WORK_DIR: ${CONTAINER_WORK_DIR}
+            CONTAINER_UV_GROUP: ${CONTAINER_UV_GROUP}
+            TZ: ${TZ}
+        volumes:
+            - ../:${CONTAINER_WORK_DIR}
+            - venv:${CONTAINER_WORK_DIR}/.venv
+        deploy:
+            resources:
+                reservations:
+                    devices:
+                        - driver: nvidia
+                          device_ids: ["${CONTAINER_GPU_ID}"]
+                          capabilities: [gpu]
+        command: ["tail", "-f", "/dev/null"]
+
+volumes:
+    venv:
+        driver: local

@@ -1,19 +1,51 @@
 {
-    "python.analysis.exclude": ["**/__pycache__", "**/.git"],
+    "code-runner.runInTerminal": true,
+    "code-runner.executorMap": {
+        "python":"zsh -c 'set -a && source $workspaceRoot/.env && exec $workspaceRoot/.venv/bin/python -u $fullFileName'"
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+    },
+    "search.exclude": {
+        "**/.git": true,
+        "**/.vscode": true,
+        "**/__pycache__": true,
+        "**/output": true,
+        "**/log": true,
+        "**/.venv/**": true
+    },
     "files.watcherExclude": {
         "**/.git/objects/**": true,
         "**/.git/subtree-cache/**": true,
-        "**/.hg/store/**": true
+        "**/.hg/store/**": true,
+        "**/.venv/**": true,
+        "**/__pycache__/**": true,
     },
+    "python.analysis.exclude": [
+        "**/.git",
+        "**/.vscode",
+        "**/__pycache__",
+        "**/output",
+        "**/log",
+        "**/.venv",
+    ],
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "python.envFile": "${workspaceFolder}/.env",
+    "jupyter.notebookFileRoot": "${workspaceFolder}",
     // Editor
     "editor.wordWrap": "on",
     "editor.wrappingIndent": "indent",
-    "editor.fontFamily": "IBM Plex Sans KR, IBM Plex Mono",
+    "editor.fontFamily": "JetBrains Mono, D2Coding",
     "editor.fontLigatures": true,
     "editor.fontSize": 18,
-    "editor.letterSpacing": 2,
+    "editor.letterSpacing": 0,
     "editor.detectIndentation": false,
     "editor.trimAutoWhitespace": true,
+    "terminal.integrated.fontFamily": "JetBrains Mono, D2Coding",
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true,
     "files.eol": "\n",
@@ -26,7 +58,9 @@
     "[markdown]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 4,
-        "editor.insertSpaces": true
+        "editor.insertSpaces": true,
+        "files.trimTrailingWhitespace": false,
     },
-    "cSpell.words": ["pysbd", "silero"]
+    "cSpell.words": [
+    ]
 }
