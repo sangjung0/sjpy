@@ -11,3 +11,6 @@ dependencies = [
     "rich>=14.2.0",
     "scipy>=1.15.3",
 ]
+
+[tool.setuptools]
+packages = ["sj_utils"]
