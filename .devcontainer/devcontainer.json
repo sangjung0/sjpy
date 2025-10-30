@@ -1,15 +1,15 @@
 {
-	"name": "Python_Utils_Dev",
+	"name": "sjpy_dev",
 	"dockerComposeFile": "./docker-compose.yml",
 	"service": "dev",
 	"workspaceFolder": "/workspaces/dev",
-    "postCreateCommand": "cd /workspaces/dev && bash .devcontainer/sh-utils/wait_for_dir.sh .venv && uv sync",
+    "postCreateCommand": "cd /workspaces/dev && bash .devcontainer/sjsh/wait_for_dir.sh .venv && uv sync",
 
     // for linux container
-    // "initializeCommand": "[ ! -d ${localWorkspaceFolder}/.devcontainer/sh-utils ] && git clone --branch main https://github.com/sangjung0/sh-utils.git ${localWorkspaceFolder}/.devcontainer/sh-utils",
+    // "initializeCommand": "[ ! -d ${localWorkspaceFolder}/.devcontainer/sjsh ] && git clone --branch main https://github.com/sangjung0/sjsh.git ${localWorkspaceFolder}/.devcontainer/sjsh",
 
     // for windows container
-    "initializeCommand": "cd /d ${localWorkspaceFolder} && if not exist .devcontainer/sh-utils git clone --branch v0.0.2 https://github.com/sangjung0/sh-utils.git .devcontainer/sh-utils",
+    "initializeCommand": "cd /d ${localWorkspaceFolder} && if not exist .devcontainer/sjsh git clone --branch v0.0.2 https://github.com/sangjung0/sjsh.git .devcontainer/sjsh",
 
 	"features": {
 		"ghcr.io/devcontainers/features/github-cli:1": {}

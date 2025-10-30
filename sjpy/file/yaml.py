@@ -1,12 +1,13 @@
-import json
+import yaml
 
 from datetime import datetime
 from pathlib import Path
 
-from sj_utils.collection import to_namespace
+from sjpy.file.service import replace
+from sjpy.collection import to_namespace
 
 
-class JsonSaver:
+class YamlSaver:
     def __init__(self, description: str):
         self.description = description
 
@@ -37,24 +38,32 @@ class JsonSaver:
             print(f"File {filepath} already exists. Overwriting...")
 
         with filepath.open("w", encoding="utf-8") as f:
-            json.dump(output, f, ensure_ascii=False, indent=4)
+            yaml.dump(output, f, allow_unicode=True, sort_keys=False)
 
 
-def load_json(filepath: Path) -> tuple[object, dict]:
-    data = read_json(filepath)
+def load_yaml(filepath: Path) -> tuple[object, dict]:
+    data = read_yaml(filepath)
     metadata = to_namespace(data["metadata"])
     return metadata, data["data"]
 
 
-def read_json(path: Path):
-    # 왜만들었지
+def read_yaml(path: Path) -> dict:
     if not path.exists():
         raise FileNotFoundError(f"File {path} does not exist.")
-    return json.loads(path.read_text(encoding="utf-8"))
+    with path.open("r", encoding="utf-8") as file:
+        config = yaml.safe_load(file)
+    replace(config)
+    return config
+
+
+def read_yaml_namespace(path: Path):
+    config = read_yaml(path)
+    return to_namespace(config)
 
 
 __all__ = [
-    "JsonSaver",
-    "load_json",
-    "read_json",
+    "YamlSaver",
+    "load_yaml",
+    "read_yaml",
+    "read_yaml_namespace",
 ]

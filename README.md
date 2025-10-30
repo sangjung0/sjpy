@@ -1,17 +1,17 @@
 <div align="center">
-  <h1> Python Utils </h1>
+  <h1> sjpy </h1>
 
 [sangjung0](https://github.com/sangjung0)
 
   <br>
 
-<a href="https://github.com/sangjung0/python-utils/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=sangjung0/python-utils" />
+<a href="https://github.com/sangjung0/sjpy/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=sangjung0/sjpy" />
 </a>
 
   <br>
   <br>
 
-개인적인 util repo
+개인적인 파이썬 util repo
 
 </div>

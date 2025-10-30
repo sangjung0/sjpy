@@ -12,7 +12,7 @@ from contextlib import ContextDecorator
 from queue import Queue
 from logging import Logger
 
-from sj_utils.logger import generate
+from sjpy.logger import generate
 
 if TYPE_CHECKING:
     from multiprocessing import synchronize
