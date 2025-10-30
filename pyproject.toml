@@ -14,8 +14,9 @@ dependencies = [
     "scipy>=1.15.3",
 ]
 
-[tool.setuptools]
-packages = ["sjpy"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sjpy*"]
 
 [dependency-groups]
 dev = [
