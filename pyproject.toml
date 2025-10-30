@@ -1,16 +1,27 @@
 [project]
-name = "python-utils"
+name = "sjpy"
 version = "0.1.0"
 description = "Custom Python utilities"
 readme = "README.md"
 requires-python = "==3.10.*"
 dependencies = [
     "ffmpeg-python>=0.2.0",
+    "librosa>=0.11.0",
     "numpy>=2.2.6",
     "python-dotenv>=1.2.1",
+    "pyyaml>=6.0.3",
     "rich>=14.2.0",
     "scipy>=1.15.3",
 ]
 
-[tool.setuptools]
-packages = ["sj_utils"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sjpy*"]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.1.0",
+    "ipywidgets>=8.1.7",
+    "jupyterlab>=4.4.10",
+    "notebook>=7.4.7",
+]

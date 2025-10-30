@@ -2,7 +2,7 @@ import time
 
 from contextlib import contextmanager
 
-from sj_utils.statistics import summarize_distribution
+from sjpy.statistics import summarize_distribution
 
 
 class TimeChecker:
