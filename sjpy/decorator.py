@@ -58,7 +58,7 @@ def lru_dict_cache(maxsize=128):
             kwarg_keys = tuple(kwarg_keys)
 
             # print(
-                # f"cache miss for {args} with {arg_idx} and {kwargs} with keys {kwarg_keys}"
+            # f"cache miss for {args} with {arg_idx} and {kwargs} with keys {kwarg_keys}"
             # )
             return cached(
                 *args,
@@ -72,4 +72,17 @@ def lru_dict_cache(maxsize=128):
     return decorator
 
 
-__all__ = ["singleton", "lru_dict_cache"]
+def generate_simple_decorator(key: str, obj: object):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if key not in kwargs:
+                kwargs[key] = obj
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+__all__ = ["singleton", "lru_dict_cache", "generate_simple_decorator"]
