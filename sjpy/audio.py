@@ -4,8 +4,10 @@ import warnings
 import tempfile
 import subprocess
 import numpy as np
+import soundfile as sf
 
 from scipy.io import wavfile
+from scipy.signal import resample_poly
 
 
 def generate_empty_chunk(dtype=np.float32) -> np.ndarray:
@@ -130,13 +132,53 @@ def ndarray_to_mp4_bytes(audio: np.ndarray, sr: int = 16000) -> bytes:
         return tmp_out.read()
 
 
-def pcm_s16le_resample_ffmpeg(
-    pcm_bytes: bytes,
-    orig_sr: int,
-    target_sr: int,
-    channels: int = 1,
-) -> np.ndarray | bytes:
-    proc = subprocess.run(
+def s16le_bytes_to_array(
+    pcm: bytes, channels: int = 1, dtype: np.dtype = np.float32
+) -> np.ndarray:
+    a = np.frombuffer(pcm, dtype="<i2")
+    if a.size % channels != 0:
+        raise ValueError("bytes not divisible by channels")
+    a = a.reshape(-1, channels)
+    if dtype == np.float32:
+        return a.astype(np.float32) / 32768.0
+    elif dtype == np.int16:
+        return a
+    else:
+        raise ValueError("dtype must be np.float32 or np.int16")
+
+
+def array_to_s16le(x: np.ndarray) -> np.ndarray:
+    x = np.asarray(x)
+    if x.ndim == 1:
+        x = x[:, None]
+    if np.issubdtype(x.dtype, np.floating):
+        x = np.clip(x, -1.0, 1.0).astype(np.float32)
+        x = (x * 32767.0).round().astype("<i2")
+    elif x.dtype != np.int16:
+        x = x.astype("<i2", copy=False)
+    else:
+        x = x.astype("<i2", copy=False)
+    return x.reshape(-1)
+
+
+def resample_wav(audio: np.ndarray, orig_sr: int, target_sr: int) -> np.ndarray:
+    audio = np.asarray(audio)
+
+    if audio.ndim == 1:
+        audio = audio[:, None]
+    elif audio.ndim != 2:
+        raise ValueError("audio must be 1D or 2D (T,) or (T,C)")
+
+    if np.issubdtype(audio.dtype, np.floating):
+        input_format = "f32le"
+        in_bytes = audio.astype(np.float32).tobytes()
+    elif np.issubdtype(audio.dtype, np.integer):
+        input_format = "s16le"
+        in_bytes = audio.astype(np.int16).tobytes()
+    else:
+        raise TypeError(f"Unsupported dtype {audio.dtype}")
+
+    process = subprocess.run(
         [
             "ffmpeg",
             "-hide_banner",
@@ -144,33 +186,69 @@ def pcm_s16le_resample_ffmpeg(
             "error",
             "-nostdin",
             "-f",
-            "s16le",
+            input_format,
+            "-ac",
+            str(audio.shape[1]),
             "-ar",
             str(orig_sr),
-            "-ac",
-            str(channels),
             "-i",
             "pipe:0",
             "-ac",
-            str(channels),
+            str(audio.shape[1]),
             "-ar",
             str(target_sr),
             "-f",
-            "f32le",
+            "f32le",  # 출력은 float32 raw PCM
             "-acodec",
             "pcm_f32le",
             "pipe:1",
         ],
-        input=pcm_bytes,
+        input=in_bytes,
         stdout=subprocess.PIPE,
         check=True,
     )
-    out = proc.stdout
-    arr = np.frombuffer(out, dtype=np.float32)
-    # (T, C)로 reshape
-    if arr.size % channels != 0:
-        raise ValueError("ffmpeg output size not divisible by channels")
-    return arr.reshape(-1, channels)
+
+    out = np.frombuffer(process.stdout, dtype=np.float32)
+    if out.size % audio.shape[1] != 0:
+        raise ValueError("Output size not divisible by channel count")
+    return out.reshape(-1, audio.shape[1])
+
+
+def compress_to_opus(bytes: bytes):
+    process = subprocess.Popen(
+        ["ffmpeg", "-i", "pipe:0", "-c:a", "libopus", "-f", "opus", "pipe:1"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,  # subprocess.DEVNULL 하면 속도 조금 더 빨라짐
+    )
+
+    out, err = process.communicate(input=bytes)
+    return out, err
+
+
+def decompress_from_opus(bytes: bytes):
+    process = subprocess.Popen(
+        ["ffmpeg", "-i", "pipe:0", "-f", "wav", "pipe:1"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    out, err = process.communicate(input=bytes)
+    return out, err
+
+
+def np_to_wav(audio: np.ndarray, sample_rate: int) -> bytes:
+    buffer = io.BytesIO()
+    sf.write(buffer, audio, sample_rate, format="wav")
+    return buffer.getvalue()
+
+
+def audio_bytes_to_np(bt: bytes, sample_rate: int) -> np.ndarray:
+    with io.BytesIO(bt) as buffer:
+        audio, sr = sf.read(buffer, dtype="float32")
+    if sr != sample_rate:
+        audio = resample_poly(audio, sample_rate, sr)
+    return audio
 
 
 __all__ = [
@@ -179,5 +257,11 @@ __all__ = [
     "load_from_mp4_file",
     "mp4_bytes_to_ndarray",
     "ndarray_to_mp4_bytes",
-    "pcm_s16le_resample_ffmpeg",
+    "s16le_bytes_to_array",
+    "array_to_s16le",
+    "resample_wav",
+    "compress_to_opus",
+    "decompress_from_opus",
+    "np_to_wav",
+    "audio_bytes_to_np",
 ]
