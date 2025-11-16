@@ -25,9 +25,13 @@ class SafetyDict(dict):
 
 
 class LRUDict(OrderedDict):
-    def __init__(self, capacity: int = 128, *args, **kwargs):
+    def __init__(self, *args, capacity: int = 128, **kwargs):
+        self._capacity = capacity
         super().__init__(*args, **kwargs)
-        self.capacity = capacity
+
+    @property
+    def capacity(self) -> int:
+        return self._capacity
 
     def __getitem__(self, key):
         val = super().__getitem__(key)
@@ -61,8 +65,18 @@ def to_namespace(d: Any):
         return d
 
 
+def namespace_to_dict(ns: Any):
+    if isinstance(ns, SimpleNamespace):
+        return {k: namespace_to_dict(v) for k, v in ns.__dict__.items()}
+    elif isinstance(ns, list):
+        return [namespace_to_dict(i) for i in ns]
+    else:
+        return ns
+
+
 __all__ = [
     "SafetyDict",
     "LRUDict",
     "to_namespace",
+    "namespace_to_dict",
 ]

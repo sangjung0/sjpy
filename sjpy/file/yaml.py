@@ -47,12 +47,12 @@ def load_yaml(filepath: Path) -> tuple[object, dict]:
     return metadata, data["data"]
 
 
-def read_yaml(path: Path) -> dict:
+def read_yaml(path: Path, replace_data: dict | None = None) -> dict:
     if not path.exists():
         raise FileNotFoundError(f"File {path} does not exist.")
     with path.open("r", encoding="utf-8") as file:
         config = yaml.safe_load(file)
-    replace(config)
+    replace(config, replace_data)
     return config
 
 
