@@ -65,8 +65,18 @@ def to_namespace(d: Any):
         return d
 
 
+def namespace_to_dict(ns: Any):
+    if isinstance(ns, SimpleNamespace):
+        return {k: namespace_to_dict(v) for k, v in ns.__dict__.items()}
+    elif isinstance(ns, list):
+        return [namespace_to_dict(i) for i in ns]
+    else:
+        return ns
+
+
 __all__ = [
     "SafetyDict",
     "LRUDict",
     "to_namespace",
+    "namespace_to_dict",
 ]
