@@ -2,10 +2,12 @@ import time
 import numpy as np
 
 from contextlib import contextmanager
+from typing_extensions import deprecated
 
 from sjpy.statistics import summarize_distribution
 
 
+@deprecated("Use sjpy.evaluator.latency_scorer.AL_scorer instead.")
 def compute_average_lagging(coverage: np.ndarray, L: float) -> float | None:
     coverage = np.asarray(coverage, dtype=np.float32)
     if coverage.ndim != 1:
@@ -31,6 +33,7 @@ def compute_average_lagging(coverage: np.ndarray, L: float) -> float | None:
     return float(np.mean(coverage[:tau] - (j - 1) * (L / J)))
 
 
+@deprecated("Use sjpy.evaluator.latency_scorer.AP_scorer instead.")
 def compute_average_proportion(coverage: np.ndarray, L: float) -> float | None:
     coverage = np.asarray(coverage, dtype=np.float32)
     if coverage.ndim != 1:
@@ -54,6 +57,7 @@ def compute_average_proportion(coverage: np.ndarray, L: float) -> float | None:
     return ap
 
 
+@deprecated("Use sjpy.evaluator.latency_scorer instead.")
 class TimeEvaluator:
     def __init__(self, L: float):
         self.times = []
@@ -86,6 +90,7 @@ class TimeEvaluator:
         return compute_average_proportion(self.coverages, self.L)
 
 
+@deprecated("Use sjpy.evaluator.latency_scorer instead.")
 class TimeEvaluatorSummary:
     def __init__(self):
         self.times = []
@@ -117,4 +122,3 @@ __all__ = [
     "TimeEvaluator",
     "TimeEvaluatorSummary",
 ]
-
