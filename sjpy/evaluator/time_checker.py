@@ -9,6 +9,9 @@ class TimeChecker:
     def __init__(self):
         self.__times = []
 
+    def get_times(self) -> list[float]:
+        return self.__times.copy()
+
     @contextmanager
     def timeit(self):
         start = time.perf_counter()

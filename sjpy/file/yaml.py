@@ -6,6 +6,9 @@ from pathlib import Path
 from sjpy.file.service import replace
 from sjpy.collection import to_namespace
 
+Metadata = object
+Data = dict
+
 
 class YamlSaver:
     def __init__(self, description: str):
@@ -41,7 +44,7 @@ class YamlSaver:
             yaml.dump(output, f, allow_unicode=True, sort_keys=False)
 
 
-def load_yaml(filepath: Path) -> tuple[object, dict]:
+def load_yaml(filepath: Path) -> tuple[Metadata, Data]:
     data = read_yaml(filepath)
     metadata = to_namespace(data["metadata"])
     return metadata, data["data"]

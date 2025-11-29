@@ -5,6 +5,9 @@ from pathlib import Path
 
 from sjpy.collection import to_namespace
 
+Metadata = object
+Data = dict
+
 
 class JsonSaver:
     def __init__(self, description: str):
@@ -40,7 +43,7 @@ class JsonSaver:
             json.dump(output, f, ensure_ascii=False, indent=4)
 
 
-def load_json(filepath: Path) -> tuple[object, dict]:
+def load_json(filepath: Path) -> tuple[Metadata, Data]:
     data = read_json(filepath)
     metadata = to_namespace(data["metadata"])
     return metadata, data["data"]
