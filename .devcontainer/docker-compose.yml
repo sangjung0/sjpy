@@ -1,7 +1,8 @@
 name: ${CONTAINER_NAME}
 services:
-    dev:
+    service:
         shm_size: 16gb
+        user: "${CONTAINER_UID}:${CONTAINER_UID}"
         build:
             context: ..
             dockerfile: .devcontainer/Dockerfile
@@ -9,8 +10,6 @@ services:
                 CONTAINER_USER: ${CONTAINER_USER}
                 CONTAINER_UID: ${CONTAINER_UID}
                 CONTAINER_HOME: ${CONTAINER_HOME}
-                CONTAINER_WORK_DIR: ${CONTAINER_WORK_DIR}
-                CONTAINER_UV_GROUP: ${CONTAINER_UV_GROUP}
         environment:
             CONTAINER_USER: ${CONTAINER_USER}
             CONTAINER_UID: ${CONTAINER_UID}
@@ -21,6 +20,7 @@ services:
         volumes:
             - ../:${CONTAINER_WORK_DIR}
             - venv:${CONTAINER_WORK_DIR}/.venv
+            - uv_cache:${CONTAINER_HOME}/.cache/uv:rw
         deploy:
             resources:
                 reservations:
@@ -28,8 +28,14 @@ services:
                         - driver: nvidia
                           device_ids: ["${CONTAINER_GPU_ID}"]
                           capabilities: [gpu]
-        command: ["tail", "-f", "/dev/null"]
+        command: sleep infinity
 
 volumes:
     venv:
         driver: local
+    uv_cache:
+        driver: local
+        driver_opts:
+            type: none
+            o: bind
+            device: ${CONTAINER_VOLUME}/cache/uv

@@ -1,15 +1,22 @@
 {
 	"name": "sjpy_dev",
 	"dockerComposeFile": "./docker-compose.yml",
-	"service": "dev",
-	"workspaceFolder": "/workspaces/dev",
-    "postCreateCommand": "cd /workspaces/dev && bash .devcontainer/sjsh/wait_for_dir.sh .venv && uv sync",
+	"service": "service",
+    "remoteUser": "root",
+	"workspaceFolder": "/workspaces/sjpy",
+    "postCreateCommand": "bash ${containerWorkspaceFolder}/.devcontainer/post_create_command.sh",
 
     // for linux container
-    // "initializeCommand": "[ ! -d ${localWorkspaceFolder}/.devcontainer/sjsh ] && git clone --branch main https://github.com/sangjung0/sjsh.git ${localWorkspaceFolder}/.devcontainer/sjsh",
+    // "initializeCommand": [
+    //  "${localWorkspaceFolder}/.devcontainer/initialize_command.sh",
+    //  "${localWorkspaceFolder}"
+    // ],
 
     // for windows container
-    "initializeCommand": "cd /d ${localWorkspaceFolder} && if not exist .devcontainer/sjsh git clone --branch v0.0.2 https://github.com/sangjung0/sjsh.git .devcontainer/sjsh",
+    "initializeCommand": [
+        "${localWorkspaceFolder}\\.devcontainer\\initialize_command.cmd",
+        "${localWorkspaceFolder}"
+    ],
 
 	"features": {
 		"ghcr.io/devcontainers/features/github-cli:1": {}
@@ -29,7 +36,6 @@
                 "streetsidesoftware.code-spell-checker",
                 "naumovs.color-highlight",
                 "oderwat.indent-rainbow",
-                "visualstudioexptteam.vscodeintellicode",
                 "ionutvmi.path-autocomplete",
                 "mgesbert.python-path",
                 "foxundermoon.shell-format",
