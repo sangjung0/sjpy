@@ -1,7 +1,8 @@
 import asyncio
+import inspect
 
 from logging import Logger
-from typing import Callable, TypeVar, Awaitable
+from typing import Callable, TypeVar, Awaitable, Any
 
 from sjpy.excptn import exc_to_str
 
@@ -92,10 +93,17 @@ def spawn_task_queue_worker(
     asyncio.create_task(_run())
 
 
+async def await_if_awaitable(aw: T | Awaitable[T]) -> T:
+    if inspect.isawaitable(aw):
+        return await aw
+    return aw
+
+
 __all__ = [
     "task_with_callback",
     "task_with_callback_guarded",
     "spawn_task_with_callback",
     "spawn_task_with_callback_guarded",
     "spawn_task_queue_worker",
+    "await_if_awaitable",
 ]

@@ -7,7 +7,7 @@ from rich.logging import RichHandler
 def generate(
     name: str,
     level: int = logging.INFO,
-    path: Path | None = None,
+    path: str | Path | None = None,
     file_log_level: int = logging.DEBUG,
 ):
     logger = logging.getLogger(name)
@@ -20,6 +20,7 @@ def generate(
         logger.addHandler(console_handler)
 
     if path is not None:
+        path = Path(path)
         file_path = path / f"{name}.log"
         for handler in logger.handlers:
             if isinstance(handler, logging.FileHandler) and handler.baseFilename == str(
