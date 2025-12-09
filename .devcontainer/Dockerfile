@@ -28,4 +28,4 @@ USER ${CONTAINER_USER}
 
 # INSTALL UV
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="${CONTAINER_HOME}/.uv/bin:$PATH"
+ENV PATH="${CONTAINER_HOME}/.local/bin:$PATH"
