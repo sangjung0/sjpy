@@ -44,13 +44,15 @@ class YamlSaver:
             yaml.dump(output, f, allow_unicode=True, sort_keys=False)
 
 
-def load_yaml(filepath: Path) -> tuple[Metadata, Data]:
+def load_yaml(filepath: Path | str) -> tuple[Metadata, Data]:
+    filepath = Path(filepath)
     data = read_yaml(filepath)
     metadata = to_namespace(data["metadata"])
     return metadata, data["data"]
 
 
-def read_yaml(path: Path, replace_data: dict | None = None) -> dict:
+def read_yaml(path: Path | str, replace_data: dict | None = None) -> dict:
+    path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"File {path} does not exist.")
     with path.open("r", encoding="utf-8") as file:
@@ -59,7 +61,7 @@ def read_yaml(path: Path, replace_data: dict | None = None) -> dict:
     return config
 
 
-def read_yaml_namespace(path: Path):
+def read_yaml_namespace(path: Path | str) -> object:
     config = read_yaml(path)
     return to_namespace(config)
 
