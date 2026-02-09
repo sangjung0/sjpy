@@ -25,7 +25,9 @@ class JsonSaver:
             "microsecond": now.microsecond,
         }
 
-    def save(self, data: dict, filepath: Path, verbose: bool = True):
+    def save(self, data: dict, filepath: Path | str, verbose: bool = True):
+        filepath = Path(filepath)
+
         output = {
             "metadata": {
                 "description": self.description,

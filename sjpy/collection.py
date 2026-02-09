@@ -1,27 +1,28 @@
 from typing import Any
 from types import SimpleNamespace
+from typing_extensions import override
 from collections import OrderedDict
+from collections.abc import Mapping
 
 
 class SafetyDict(dict):
-    def __init__(
-        self,
-        data: dict = {},
-        *args,
-        **kwargs,
-    ):
-        super().__init__(*args, **kwargs)
-        if data:
-            self.__dict_to_safety(data)
-            self.update(data)
+    def __init__(self, data: Mapping[str, Any] | None = None):
+        super().__init__()
 
-    def __getitem__(self, key):
-        return super().get(key, self.get("default", None))
+        if data is not None:
+            self.update(self._to_safety(dict(data)))
 
-    def __dict_to_safety(self, d: dict):
-        for key, value in d.items():
-            if isinstance(value, dict):
-                d[key] = SafetyDict(value)
+    @override
+    def __missing__(self, key: Any) -> Any:
+        return dict.get(self, "default", None)
+
+    def _to_safety(self, d: dict[str, Any]) -> dict[str, Any]:
+        for k, v in list(d.items()):
+            if isinstance(v, dict):
+                d[k] = SafetyDict(data=v)
+            elif isinstance(v, list):
+                d[k] = [SafetyDict(data=x) if isinstance(x, dict) else x for x in v]
+        return d
 
 
 class LRUDict(OrderedDict):
