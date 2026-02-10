@@ -3,7 +3,7 @@ import yaml
 from datetime import datetime
 from pathlib import Path
 
-from sjpy.file.service import replace
+from sjpy.file.algorithm import replace
 from sjpy.collection import to_namespace
 
 Metadata = object
