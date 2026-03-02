@@ -11,6 +11,7 @@ def extract_zip(
     zip_path: str | Path,
     extract_dir: str | Path | None = None,
     verbose: bool = True,
+    remove_zip: bool = False,
 ) -> Path:
     zip_path = Path(zip_path)
     if not zip_path.exists():
@@ -59,6 +60,10 @@ def extract_zip(
 
     if verbose:
         print(f"[extract] {zip_path} -> {extract_dir}")
+    if remove_zip:
+        if verbose:
+            print(f"Removing zip file: {zip_path}")
+        zip_path.unlink()
 
     return extract_dir
 

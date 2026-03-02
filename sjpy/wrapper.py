@@ -9,7 +9,7 @@ from typing import Any, Callable, Dict, Type
 if TYPE_CHECKING:
     pass
 
-# NOTE AI가 만듬 믿어선 안돼~!
+# NOTE AI가 만듦 믿어선 안돼~!
 
 _BINARY_OPS: Dict[str, Callable[[Any, Any], Any]] = {
     "__add__": operator.add,
