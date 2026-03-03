@@ -3,16 +3,16 @@ import inspect
 
 from pathlib import Path
 
-def get_top_package_root(depth: int = 1):
+
+def get_top_package_root(depth: int = 1) -> None | Path:
     frm = inspect.stack()[depth].frame
     mod = inspect.getmodule(frm)
-    mod_name = mod.__name__
 
-    if not mod_name:
+    if not mod:
         return None
 
     top_pkg_spec = None
-    parent = mod_name
+    parent = mod.__name__
     while True:
         if not parent:
             break
@@ -24,5 +24,6 @@ def get_top_package_root(depth: int = 1):
     if top_pkg_spec and top_pkg_spec.submodule_search_locations:
         return Path(list(top_pkg_spec.submodule_search_locations)[0]).resolve()
     return None
+
 
 __all__ = ["get_top_package_root"]

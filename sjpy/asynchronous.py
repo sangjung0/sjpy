@@ -99,6 +99,13 @@ async def await_if_awaitable(aw: T | Awaitable[T]) -> T:
     return aw
 
 
+def async_lambda(func: Callable, *args, **kwargs) -> Callable[[], Awaitable[Any]]:
+    async def _func() -> Any:
+        return await func(*args, **kwargs)
+
+    return _func
+
+
 __all__ = [
     "task_with_callback",
     "task_with_callback_guarded",
@@ -106,4 +113,5 @@ __all__ = [
     "spawn_task_with_callback_guarded",
     "spawn_task_queue_worker",
     "await_if_awaitable",
+    "async_lambda",
 ]
