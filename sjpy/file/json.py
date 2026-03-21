@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 import json
 
-from datetime import datetime
+from typing import Mapping
 from pathlib import Path
+from datetime import datetime
 
 from sjpy.collection import to_namespace
 
@@ -25,7 +28,7 @@ class JsonSaver:
             "microsecond": now.microsecond,
         }
 
-    def save(self, data: dict, filepath: Path | str, verbose: bool = True):
+    def save(self, data: Mapping, filepath: Path | str, verbose: bool = True):
         filepath = Path(filepath)
 
         output = {

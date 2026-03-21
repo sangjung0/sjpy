@@ -11,9 +11,6 @@
 from typing import Sequence
 
 
-__all__ = ["AL_score", "LAAL_score", "DAL_score", "AP_score", "average_latency"]
-
-
 def AL_score(
     delays: Sequence[float], source_length: int, target_length: int | None = None
 ) -> float:
@@ -95,3 +92,6 @@ def AP_score(
 
 def average_latency(delays: Sequence[float]) -> float:
     return sum(delays) / len(delays)
+
+
+__all__ = ["AL_score", "LAAL_score", "DAL_score", "AP_score", "average_latency"]

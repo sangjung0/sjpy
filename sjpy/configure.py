@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 from sjpy.reference import get_top_package_root
 from sjpy.file.yaml import read_yaml
@@ -12,7 +12,7 @@ from sjpy.file.yaml import read_yaml
 def load_config(
     config_file_name: str,
     config_head: str,
-    paths: list[str | Path] | None = None,
+    paths: Sequence[str | Path] | None = None,
 ) -> dict[str, Any]:
     if paths is None:
         config_paths = []

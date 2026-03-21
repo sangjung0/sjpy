@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import yaml
 
+from typing import Mapping
 from datetime import datetime
 from pathlib import Path
 
@@ -26,7 +29,7 @@ class YamlSaver:
             "microsecond": now.microsecond,
         }
 
-    def save(self, data: dict, filepath: Path, verbose: bool = True):
+    def save(self, data: Mapping, filepath: Path, verbose: bool = True):
         output = {
             "metadata": {
                 "description": self.description,

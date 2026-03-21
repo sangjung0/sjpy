@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import math
 import numpy as np
+
+from typing import Sequence
 
 from scipy.stats import skew, kurtosis
 
@@ -32,7 +36,7 @@ def update_mean_std(
 
 
 def summarize_distribution(
-    data: list[int | float],
+    data: Sequence[int | float],
     hist_bins: int = 10,
 ) -> dict:
     if len(data) == 0:
@@ -54,20 +58,20 @@ def summarize_distribution(
             },
         }
 
-    data = np.array(data, dtype=np.float64)
-    n = len(data)
-    mean = float(np.mean(data))
-    std = float(np.std(data))
-    _min = float(np.min(data))
-    q1 = float(np.percentile(data, 25))
-    q2 = float(np.percentile(data, 50))
-    q3 = float(np.percentile(data, 75))
-    _max = float(np.max(data))
+    array = np.array(data, dtype=np.float64)
+    n = len(array)
+    mean = float(np.mean(array))
+    std = float(np.std(array))
+    _min = float(np.min(array))
+    q1 = float(np.percentile(array, 25))
+    q2 = float(np.percentile(array, 50))
+    q3 = float(np.percentile(array, 75))
+    _max = float(np.max(array))
     iqr = q3 - q1
-    _skew = float(skew(data))
-    _kurtosis = float(kurtosis(data))
+    _skew = float(skew(array))
+    _kurtosis = float(kurtosis(array))
 
-    hist, bin_edges = np.histogram(data, bins=hist_bins, density=True)
+    hist, bin_edges = np.histogram(array, bins=hist_bins, density=True)
     bin_probs = hist / hist.sum()
 
     return {

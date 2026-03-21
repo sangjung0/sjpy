@@ -1,16 +1,21 @@
+from __future__ import annotations
+
 import numpy as np
+import numpy.typing as npt
 import base64
 
+from typing import Any
 
-def numpy_to_base64(array: np.ndarray) -> str:
+
+def numpy_to_base64(array: npt.NDArray[Any]) -> str:
     if array is None:
         return ""
     return base64.b64encode(array.tobytes()).decode("utf-8")
 
 
 def base64_to_numpy(
-    encoded_str: str, dtype: np.dtype = np.float32, shape: tuple | None = None
-) -> np.ndarray | None:
+    encoded_str: str, dtype: npt.DTypeLike = np.float32, shape: tuple | None = None
+) -> npt.NDArray[Any] | None:
     if not encoded_str:
         return None
     byte_data = base64.b64decode(encoded_str.encode("utf-8"))

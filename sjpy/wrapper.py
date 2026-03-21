@@ -51,40 +51,40 @@ def _make_numeric(cls: Type, caster: Callable[[Any], Any], *, is_int: bool) -> T
     for name, op in _BINARY_OPS.items():
 
         @wraps(op)
-        def f(self, other, _op=op):  # _op 디폴트 인수 trick으로 late-binding 방지
+        def f0(self, other, _op=op):  # _op 디폴트 인수 trick으로 late-binding 방지
             return _op(caster(self.value), other)
 
         @wraps(op)
         def rf(self, other, _op=op):
             return _op(other, caster(self.value))
 
-        setattr(cls, name, f)
+        setattr(cls, name, f0)
         setattr(cls, f"__r{name[2:]}", rf)  # __add__ -> __radd__
 
     # ---------- 단항 연산 ----------
     for name, op in _UNARY_OPS.items():
 
         @wraps(op)
-        def f(self, _op=op):
+        def f1(self, _op=op):
             return _op(caster(self.value))
 
-        setattr(cls, name, f)
+        setattr(cls, name, f1)
 
     # ---------- 비교 연산 ----------
     for name, op in _CMP_OPS.items():
 
         @wraps(op)
-        def f(self, other, _op=op):
+        def f2(self, other, _op=op):
             return _op(caster(self.value), other)
 
-        setattr(cls, name, f)
+        setattr(cls, name, f2)
 
     # ---------- 기본 특수 메서드 ----------
     cls.__int__ = lambda self: int(self.value)
     cls.__float__ = lambda self: float(self.value)
     if is_int:
         cls.__index__ = lambda self: int(self.value)  # range(), list[x] 등에 필요
-    cls.__repr__ = lambda self: f"{cls.__class__.__name__}({self.value})"
+    cls.__repr__ = lambda self: f"{cls.__class__.__name__}({self.value})"  # type: ignore
 
     return cls
 

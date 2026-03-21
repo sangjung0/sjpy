@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import os
 import re
 
+from typing import Mapping
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -9,24 +12,24 @@ PATTERN = re.compile(r"\$\{(\w+)(?::([^}]*))?\}")
 load_dotenv()
 
 
-def replace(d: dict, replace_data: dict = None):
-    replace_data = replace_data or {}
-    replace_data.update(os.environ)
+def replace(d: dict, replace_data: Mapping[str, str] | None = None):
+    _replace_data = dict(replace_data or {})
+    _replace_data.update(os.environ)
 
     for k, v in d.items():
         if isinstance(v, dict):
-            replace(v, replace_data)
+            replace(v, _replace_data)
         elif isinstance(v, list):
             for idx in range(len(v)):
                 if isinstance(v[idx], dict):
-                    replace(v[idx], replace_data)
+                    replace(v[idx], _replace_data)
                 elif isinstance(v[idx], str):
-                    v[idx] = PATTERN.sub(lambda m: replacer(m, replace_data), v[idx])
+                    v[idx] = PATTERN.sub(lambda m: replacer(m, _replace_data), v[idx])
         elif isinstance(v, str):
-            d[k] = PATTERN.sub(lambda m: replacer(m, replace_data), v)
+            d[k] = PATTERN.sub(lambda m: replacer(m, _replace_data), v)
 
 
-def replacer(match: re.Match[str], replace_data: dict) -> str:
+def replacer(match: re.Match[str], replace_data: Mapping[str, str]) -> str:
     return replace_data.get(match.group(1), match.group(2))
 
 

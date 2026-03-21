@@ -1,25 +1,30 @@
+from __future__ import annotations
+
 import ffmpeg
 import io
 import warnings
 import tempfile
 import subprocess
 import numpy as np
+import numpy.typing as npt
 import soundfile as sf
 
+from types import ModuleType
+from typing import Any
 from scipy.io import wavfile
 from scipy.signal import resample_poly
 
 
-def generate_empty_chunk(dtype=np.float32) -> np.ndarray:
+def generate_empty_chunk(dtype: npt.DTypeLike = np.float32) -> npt.NDArray[Any]:
     return np.zeros((0,), dtype=dtype)
 
 
 def segment(
-    audio: np.ndarray,
+    audio: npt.NDArray[Any],
     mean: int = 48000,
     std: int = 0,
     max_div: int = 0,
-    rng: np.random.Generator | np.random.RandomState = np.random,
+    rng: np.random.Generator | np.random.RandomState | ModuleType = np.random,
 ):
     segments = []
     length = len(audio)
@@ -35,8 +40,8 @@ def segment(
 
 
 def load_from_mp4_file(
-    mp4_path: str, sr: int = 16000, dtype: type | np.dtype = np.float32
-) -> tuple[np.ndarray, int]:
+    mp4_path: str, sr: int = 16000, dtype: npt.DTypeLike = np.float32
+) -> tuple[npt.NDArray[Any], int]:
 
     out, _ = (
         ffmpeg.input(mp4_path)
@@ -61,12 +66,12 @@ def load_from_mp4_file(
 
     elif np.issubdtype(desired, np.integer):
         if np.issubdtype(waveform.dtype, np.floating):
-            info = np.iinfo(desired)
+            info = np.iinfo(dtype)
             scale = float(info.max)
             waveform = np.clip(waveform, -1.0, 1.0)
             waveform = (waveform * scale).round().astype(desired)
         else:
-            dst_info = np.iinfo(desired)
+            dst_info = np.iinfo(dtype)
             waveform = np.clip(waveform, dst_info.min, dst_info.max).astype(desired)
 
     else:
@@ -75,7 +80,7 @@ def load_from_mp4_file(
     return waveform, sample_rate
 
 
-def mp4_bytes_to_ndarray(mp4_bytes: bytes, sr: int = 16000) -> np.ndarray:
+def mp4_bytes_to_ndarray(mp4_bytes: bytes, sr: int = 16000) -> npt.NDArray[np.float32]:
     with tempfile.NamedTemporaryFile(suffix=".mp4") as tmp_in:
         tmp_in.write(mp4_bytes)
         tmp_in.flush()
@@ -102,7 +107,7 @@ def mp4_bytes_to_ndarray(mp4_bytes: bytes, sr: int = 16000) -> np.ndarray:
         return np.frombuffer(out, dtype=np.float32)
 
 
-def ndarray_to_mp4_bytes(audio: np.ndarray, sr: int = 16000) -> bytes:
+def ndarray_to_mp4_bytes(audio: npt.NDArray[Any], sr: int = 16000) -> bytes:
     with tempfile.NamedTemporaryFile(suffix=".mp4") as tmp_out:
         process = subprocess.Popen(
             [
@@ -133,8 +138,8 @@ def ndarray_to_mp4_bytes(audio: np.ndarray, sr: int = 16000) -> bytes:
 
 
 def s16le_bytes_to_array(
-    pcm: bytes, channels: int = 1, dtype: np.dtype = np.float32
-) -> np.ndarray:
+    pcm: bytes, channels: int = 1, dtype: npt.DTypeLike = np.float32
+) -> npt.NDArray[Any]:
     a = np.frombuffer(pcm, dtype="<i2")
     if a.size % channels != 0:
         raise ValueError("bytes not divisible by channels")
@@ -147,7 +152,7 @@ def s16le_bytes_to_array(
         raise ValueError("dtype must be np.float32 or np.int16")
 
 
-def array_to_s16le(x: np.ndarray) -> np.ndarray:
+def array_to_s16le(x: npt.NDArray[Any]) -> npt.NDArray[np.int16]:
     x = np.asarray(x)
     if x.ndim == 1:
         x = x[:, None]
@@ -161,7 +166,9 @@ def array_to_s16le(x: np.ndarray) -> np.ndarray:
     return x.reshape(-1)
 
 
-def resample_wav(audio: np.ndarray, orig_sr: int, target_sr: int) -> np.ndarray:
+def resample_wav(
+    audio: npt.NDArray[Any], orig_sr: int, target_sr: int
+) -> npt.NDArray[np.float32]:
     audio = np.asarray(audio)
 
     if audio.ndim == 1:
@@ -214,7 +221,7 @@ def resample_wav(audio: np.ndarray, orig_sr: int, target_sr: int) -> np.ndarray:
     return out.reshape(-1, audio.shape[1])
 
 
-def compress_to_opus(bytes: bytes):
+def compress_to_opus(bytes: bytes) -> tuple[bytes, bytes]:
     process = subprocess.Popen(
         ["ffmpeg", "-i", "pipe:0", "-c:a", "libopus", "-f", "opus", "pipe:1"],
         stdin=subprocess.PIPE,
@@ -226,7 +233,7 @@ def compress_to_opus(bytes: bytes):
     return out, err
 
 
-def decompress_from_opus(bytes: bytes):
+def decompress_from_opus(bytes: bytes) -> tuple[bytes, bytes]:
     process = subprocess.Popen(
         ["ffmpeg", "-i", "pipe:0", "-f", "wav", "pipe:1"],
         stdin=subprocess.PIPE,
@@ -237,13 +244,13 @@ def decompress_from_opus(bytes: bytes):
     return out, err
 
 
-def np_to_wav(audio: np.ndarray, sample_rate: int) -> bytes:
+def np_to_wav(audio: npt.NDArray[Any], sample_rate: int) -> bytes:
     buffer = io.BytesIO()
     sf.write(buffer, audio, sample_rate, format="wav")
     return buffer.getvalue()
 
 
-def audio_bytes_to_np(bt: bytes, sample_rate: int) -> np.ndarray:
+def audio_bytes_to_np(bt: bytes, sample_rate: int) -> npt.NDArray[Any]:
     with io.BytesIO(bt) as buffer:
         audio, sr = sf.read(buffer, dtype="float32")
     if sr != sample_rate:

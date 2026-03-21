@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
 
 import os
 import time
@@ -8,14 +7,12 @@ import threading
 import psutil
 import multiprocessing as mp
 
+from multiprocessing import synchronize
 from contextlib import ContextDecorator
 from queue import Queue
 from logging import Logger
 
 from sjpy.logger import generate
-
-if TYPE_CHECKING:
-    from multiprocessing import synchronize
 
 
 def _sampler_proc(
@@ -81,18 +78,18 @@ class MemScope(ContextDecorator):
         if logger is None:
             logger = generate(__name__)
 
-        self.logger = logger
-        self.sample_ms = sample_ms
-        self.include_children = include_children
-        self.backend = backend
+        self.logger: Logger = logger
+        self.sample_ms: int = sample_ms
+        self.include_children: bool = include_children
+        self.backend: str = backend
 
-        self._target_pid = os.getpid()
+        self._target_pid: int = os.getpid()
         self._stop_evt: synchronize.Event | threading.Event | None = None
         self._queue: mp.Queue | Queue | None = None
         self._worker: mp.Process | threading.Thread | None = None
 
         self._t0: float | None = None
-        self.stats: dict[str, float | int] = {}
+        self.stats: dict[str, float | int | str] = {}
 
     def _proc_work(self):
         self._stop_evt = mp.Event()
@@ -139,6 +136,11 @@ class MemScope(ContextDecorator):
         return self
 
     def __exit__(self, exc_type, exc, tb):
+        assert self._stop_evt is not None
+        assert self._worker is not None
+        assert self._queue is not None
+        assert self._t0 is not None
+
         self._stop_evt.set()
         self._worker.join(timeout=2.0)
 
@@ -180,16 +182,16 @@ class MemScope(ContextDecorator):
 
         log = (
             "[MemScope]\n"
-            f"  RSS: start={mib(self.stats['rss_start']):.1f} MiB, "
-            f"end={mib(self.stats['rss_end']):.1f} MiB, "
-            f"delta={mib(self.stats['rss_delta']):+.1f} MiB, "
-            f"peak={mib(self.stats['rss_peak_in_block']):.1f} MiB "
-            f"(+{mib(self.stats['rss_peak_over_start_delta']):.1f} over start)\n"
-            f"  USS: start={mib(self.stats['uss_start']):.1f} MiB, "
-            f"end={mib(self.stats['uss_end']):.1f} MiB, "
-            f"delta={mib(self.stats['uss_delta']):+.1f} MiB, "
-            f"peak={mib(self.stats['uss_peak_in_block']):.1f} MiB "
-            f"(+{mib(self.stats['uss_peak_over_start_delta']):.1f} over start)\n"
+            f"  RSS: start={mib(self.stats['rss_start']):.1f} MiB, "  # type: ignore
+            f"end={mib(self.stats['rss_end']):.1f} MiB, "  # type: ignore
+            f"delta={mib(self.stats['rss_delta']):+.1f} MiB, "  # type: ignore
+            f"peak={mib(self.stats['rss_peak_in_block']):.1f} MiB "  # type: ignore
+            f"(+{mib(self.stats['rss_peak_over_start_delta']):.1f} over start)\n"  # type: ignore
+            f"  USS: start={mib(self.stats['uss_start']):.1f} MiB, "  # type: ignore
+            f"end={mib(self.stats['uss_end']):.1f} MiB, "  # type: ignore
+            f"delta={mib(self.stats['uss_delta']):+.1f} MiB, "  # type: ignore
+            f"peak={mib(self.stats['uss_peak_in_block']):.1f} MiB "  # type: ignore
+            f"(+{mib(self.stats['uss_peak_over_start_delta']):.1f} over start)\n"  # type: ignore
             f"  samples={self.stats['samples']}, "
             f"duration={self.stats['duration_s']:.2f}s, "
             f"backend={self.stats['backend']}, children={self.stats['include_children']}"
