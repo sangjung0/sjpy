@@ -4,6 +4,7 @@ import importlib.util
 import inspect
 
 from pathlib import Path
+from typing import Mapping, Any
 
 
 def get_top_package_root(depth: int = 1) -> None | Path:
@@ -28,4 +29,18 @@ def get_top_package_root(depth: int = 1) -> None | Path:
     return None
 
 
-__all__ = ["get_top_package_root"]
+def import_from(data: Mapping[str, Any]) -> type:
+    import sys
+    from importlib import import_module
+    from functools import reduce
+
+    module, qual = data["module"], data["qualname"]
+    if module in ("__main__", "__mp_main__"):
+        m = sys.modules[module]
+    else:
+        m = import_module(module)
+    _class: type = reduce(getattr, qual.split("."), m)
+    return _class
+
+
+__all__ = ["get_top_package_root", "import_from"]
