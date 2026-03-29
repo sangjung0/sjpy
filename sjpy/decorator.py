@@ -2,21 +2,48 @@ from __future__ import annotations
 
 import json
 
-from typing import Any
+from threading import Lock
+from typing import TypeVar, Any
 from functools import wraps, lru_cache
 
+T = TypeVar("T", bound=type)
 
-def singleton(cls):
-    implementation = None
 
-    @wraps(cls)
-    def get_instance(*args, **kwargs):
-        nonlocal implementation
-        if implementation is None:
-            implementation = cls(*args, **kwargs)
-        return implementation
+class SingletonMeta(type):
+    _instances: dict[type, object] = {}
+    _init_args: dict[type, tuple[tuple[Any, ...], dict[str, Any]]] = {}
+    _locks: dict[type, Lock] = {}
 
-    return get_instance
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._locks:
+            cls._locks[cls] = Lock()
+
+        with cls._locks[cls]:
+            if cls not in cls._instances:
+                obj = super().__call__(*args, **kwargs)
+                cls._instances[cls] = obj
+                cls._init_args[cls] = (args, dict(kwargs))
+                return obj
+            o_args, o_kwargs = cls._init_args[cls]  # type: ignore
+            if o_args != args or o_kwargs != kwargs:
+                raise ValueError(
+                    f"Singleton class {cls.__name__} already instantiated with different arguments: {o_args}, {o_kwargs} vs {args}, {kwargs}"
+                )
+            return cls._instances[cls]
+
+
+def singleton(cls: T) -> T:
+    class CombinedMeta(SingletonMeta, type(cls)):
+        pass
+
+    class SingletonWrapper(cls, metaclass=CombinedMeta):
+        pass
+
+    SingletonWrapper.__name__ = cls.__name__
+    SingletonWrapper.__qualname__ = cls.__qualname__
+    SingletonWrapper.__module__ = cls.__module__
+    SingletonWrapper.__doc__ = cls.__doc__
+    return SingletonWrapper
 
 
 def lru_dict_cache(maxsize=128):
