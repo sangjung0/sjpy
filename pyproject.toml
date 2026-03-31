@@ -12,6 +12,7 @@ dependencies = [
     "pyyaml>=6.0.3",
     "rich>=14.2.0",
     "scipy>=1.15.3",
+    "tqdm>=4.67.3",
 ]
 
 [dependency-groups]
@@ -22,10 +23,22 @@ dev = [
     "notebook>=7.4.7",
 ]
 test = [
+    "mypy>=1.20.0",
     "pytest>=9.0.2",
     "pytest-dotenv>=0.5.2",
     "ruff>=0.15.8",
+    "scipy-stubs>=1.15.3.0",
+    "types-psutil>=7.2.2.20260130",
+    "types-pyyaml>=6.0.12.20250915",
+    "types-tqdm>=4.67.3.20260303",
 ]
+
+[tool.mypy]
+strict = true
+
+[[tool.mypy.overrides]]
+module = ["ffmpeg", "soundfile"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 env_files=[".env"]

@@ -14,7 +14,9 @@ def numpy_to_base64(array: npt.NDArray[Any]) -> str:
 
 
 def base64_to_numpy(
-    encoded_str: str, dtype: npt.DTypeLike = np.float32, shape: tuple | None = None
+    encoded_str: str,
+    dtype: npt.DTypeLike = np.float32,
+    shape: tuple[int, ...] | None = None,
 ) -> npt.NDArray[Any] | None:
     if not encoded_str:
         return None

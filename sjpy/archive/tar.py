@@ -53,8 +53,7 @@ def extract_tar(
 
     extracted: list[Path] = []
 
-    mode = "r:*"  # auto-detect compression (gz, bz2, xz, etc.)
-    with tarfile.open(archive_path, mode) as tf:
+    with tarfile.open(archive_path, "r:*") as tf:
         members = tf.getmembers()
 
         pbar = None

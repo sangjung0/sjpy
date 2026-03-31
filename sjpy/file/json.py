@@ -2,21 +2,22 @@ from __future__ import annotations
 
 import json
 
-from typing import Mapping
+from typing import Any
+from collections.abc import Mapping
 from pathlib import Path
 from datetime import datetime
 
 from sjpy.collection import to_namespace
 
 Metadata = object
-Data = dict
+Data = dict[str, Any]
 
 
 class JsonSaver:
     def __init__(self, description: str):
-        self.description = description
+        self.description: str = description
 
-    def _get_current_time_dict(self):
+    def _get_current_time_dict(self) -> dict[str, int]:
         now = datetime.now()
         return {
             "year": now.year,
@@ -28,7 +29,9 @@ class JsonSaver:
             "microsecond": now.microsecond,
         }
 
-    def save(self, data: Mapping, filepath: Path | str, verbose: bool = True):
+    def save(
+        self, data: Mapping[str, Any], filepath: Path | str, verbose: bool = True
+    ) -> None:
         filepath = Path(filepath)
 
         output = {
@@ -54,11 +57,12 @@ def load_json(filepath: Path) -> tuple[Metadata, Data]:
     return metadata, data["data"]
 
 
-def read_json(path: Path):
+def read_json(path: Path) -> dict[str, Any]:
     # 왜만들었지
     if not path.exists():
         raise FileNotFoundError(f"File {path} does not exist.")
-    return json.loads(path.read_text(encoding="utf-8"))
+    data: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
+    return data
 
 
 __all__ = [

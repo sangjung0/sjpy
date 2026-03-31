@@ -25,11 +25,11 @@ def segment(
     std: int = 0,
     max_div: int = 0,
     rng: np.random.Generator | np.random.RandomState | ModuleType = np.random,
-):
-    segments = []
-    length = len(audio)
+) -> list[npt.NDArray[Any]]:
+    segments: list[npt.NDArray[Any]] = []
+    length: int = len(audio)
 
-    start = 0
+    start: int = 0
     while start < length:
         read_len = np.clip(int(rng.normal(mean, std)), mean - max_div, mean + max_div)
         end = min(start + read_len, length)
@@ -67,7 +67,7 @@ def load_from_mp4_file(
     elif np.issubdtype(desired, np.integer):
         if np.issubdtype(waveform.dtype, np.floating):
             info = np.iinfo(dtype)
-            scale = float(info.max)
+            scale = float(info.max)  # type: ignore[assignment]
             waveform = np.clip(waveform, -1.0, 1.0)
             waveform = (waveform * scale).round().astype(desired)
         else:
@@ -251,6 +251,7 @@ def np_to_wav(audio: npt.NDArray[Any], sample_rate: int) -> bytes:
 
 
 def audio_bytes_to_np(bt: bytes, sample_rate: int) -> npt.NDArray[Any]:
+    audio: npt.NDArray[Any]
     with io.BytesIO(bt) as buffer:
         audio, sr = sf.read(buffer, dtype="float32")
     if sr != sample_rate:

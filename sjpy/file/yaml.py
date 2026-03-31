@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import yaml
 
-from typing import Mapping
+from typing import Any
+from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
 
@@ -10,14 +11,14 @@ from sjpy.file.algorithm import replace
 from sjpy.collection import to_namespace
 
 Metadata = object
-Data = dict
+Data = dict[str, Any]
 
 
 class YamlSaver:
     def __init__(self, description: str):
         self.description = description
 
-    def _get_current_time_dict(self):
+    def _get_current_time_dict(self) -> dict[str, int]:
         now = datetime.now()
         return {
             "year": now.year,
@@ -29,7 +30,9 @@ class YamlSaver:
             "microsecond": now.microsecond,
         }
 
-    def save(self, data: Mapping, filepath: Path, verbose: bool = True):
+    def save(
+        self, data: Mapping[Any, Any], filepath: Path, verbose: bool = True
+    ) -> None:
         output = {
             "metadata": {
                 "description": self.description,
@@ -54,12 +57,14 @@ def load_yaml(filepath: Path | str) -> tuple[Metadata, Data]:
     return metadata, data["data"]
 
 
-def read_yaml(path: Path | str, replace_data: dict | None = None) -> dict:
+def read_yaml(
+    path: Path | str, replace_data: Mapping[str, str] | None = None
+) -> dict[str, Any]:
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"File {path} does not exist.")
     with path.open("r", encoding="utf-8") as file:
-        config = yaml.safe_load(file)
+        config: dict[str, Any] = yaml.safe_load(file)
     replace(config, replace_data)
     return config
 

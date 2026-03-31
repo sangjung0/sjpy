@@ -3,7 +3,8 @@ from __future__ import annotations
 import math
 import numpy as np
 
-from typing import Sequence
+from typing import Any
+from collections.abc import Sequence
 
 from scipy.stats import skew, kurtosis
 
@@ -38,7 +39,7 @@ def update_mean_std(
 def summarize_distribution(
     data: Sequence[int | float],
     hist_bins: int = 10,
-) -> dict:
+) -> dict[str, Any]:
     if len(data) == 0:
         return {
             "n": 0,

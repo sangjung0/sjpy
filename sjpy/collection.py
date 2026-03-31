@@ -4,7 +4,7 @@ from typing import Any
 from types import SimpleNamespace
 
 
-def to_namespace(d: Any):
+def to_namespace(d: Any) -> Any:
     if isinstance(d, dict):
         return SimpleNamespace(**{k: to_namespace(v) for k, v in d.items()})
     elif isinstance(d, list):
@@ -13,7 +13,7 @@ def to_namespace(d: Any):
         return d
 
 
-def namespace_to_dict(ns: Any):
+def namespace_to_dict(ns: Any) -> dict[Any, Any] | list[Any] | Any:
     if isinstance(ns, SimpleNamespace):
         return {k: namespace_to_dict(v) for k, v in ns.__dict__.items()}
     elif isinstance(ns, list):

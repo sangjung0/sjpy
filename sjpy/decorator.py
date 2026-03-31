@@ -4,6 +4,7 @@ import json
 
 from threading import Lock
 from typing import TypeVar, Any
+from collections.abc import Callable
 from functools import wraps, lru_cache
 
 T = TypeVar("T", bound=type)
@@ -14,7 +15,7 @@ class SingletonMeta(type):
     _init_args: dict[type, tuple[tuple[Any, ...], dict[str, Any]]] = {}
     _locks: dict[type, Lock] = {}
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args: Any, **kwargs: Any) -> object:
         if cls not in cls._locks:
             cls._locks[cls] = Lock()
 
@@ -24,7 +25,7 @@ class SingletonMeta(type):
                 cls._instances[cls] = obj
                 cls._init_args[cls] = (args, dict(kwargs))
                 return obj
-            o_args, o_kwargs = cls._init_args[cls]  # type: ignore
+            o_args, o_kwargs = cls._init_args[cls]  # type: ignore[unused-ignore]
             if o_args != args or o_kwargs != kwargs:
                 raise ValueError(
                     f"Singleton class {cls.__name__} already instantiated with different arguments: {o_args}, {o_kwargs} vs {args}, {kwargs}"
@@ -32,11 +33,14 @@ class SingletonMeta(type):
             return cls._instances[cls]
 
 
-def singleton(cls: T) -> T:
-    class CombinedMeta(SingletonMeta, type(cls)):
+def singleton(cls: type[T]) -> type[T]:
+    cls_base: Any = cls
+    meta_base: Any = type(cls)
+
+    class CombinedMeta(SingletonMeta, meta_base):  # type: ignore[misc]
         pass
 
-    class SingletonWrapper(cls, metaclass=CombinedMeta):
+    class SingletonWrapper(cls_base, metaclass=CombinedMeta):  # type: ignore[misc]
         pass
 
     SingletonWrapper.__name__ = cls.__name__
@@ -46,16 +50,18 @@ def singleton(cls: T) -> T:
     return SingletonWrapper
 
 
-def lru_dict_cache(maxsize=128):
-    def decorator(func):
+def lru_dict_cache(
+    maxsize: int = 128,
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @lru_cache(maxsize=maxsize)
         def cached(
-            *args: tuple,
+            *args: Any,
             __cache__arg_idx__: tuple[int, ...],
             __cache__kwarg_keys__: tuple[str, ...],
-            **kwargs: dict[str, Any],
-        ):
-            _args: list = list(args)
+            **kwargs: Any,
+        ) -> Any:
+            _args: list[Any] = list(args)
             for idx in __cache__arg_idx__:
                 _args[idx] = json.loads(_args[idx])
 
@@ -65,49 +71,55 @@ def lru_dict_cache(maxsize=128):
                 kwargs[key] = json.loads(v)
 
             # print(f"cache hit for {args} and {kwargs}")
-            return func(*args, **kwargs)
+            value: Any = func(*args, **kwargs)
+            return value
 
         @wraps(func)
-        def wrapper(*args, **kwargs):
-            new_args: list = []
-            arg_idx: list = []
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            new_args: list[Any] = []
+            arg_idx: list[Any] = []
             for i, arg in enumerate(args):
                 if isinstance(arg, dict):
                     arg = json.dumps(arg, sort_keys=True)
                     arg_idx.append(i)
                 new_args.append(arg)
-            _args: tuple = tuple(new_args)
+            _args: tuple[Any, ...] = tuple(new_args)
             _arg_idx: tuple[int, ...] = tuple(arg_idx)
 
             new_kwargs: dict[str, Any] = {}
             kwarg_keys: list[str] = []
             for k, v in kwargs.items():
                 if isinstance(v, dict):
-                    v = json.dumps(v, sort_keys=True)
+                    _v = json.dumps(v, sort_keys=True)
                     kwarg_keys.append(k)
-                new_kwargs[k] = v
+                else:
+                    _v = v
+                new_kwargs[k] = _v
             _kwargs: dict[str, Any] = new_kwargs
             _kwarg_keys: tuple[str, ...] = tuple(kwarg_keys)
 
             # print(
             # f"cache miss for {args} with {arg_idx} and {kwargs} with keys {kwarg_keys}"
             # )
-            return cached(
-                *args,
+            value: Any = cached(
+                *_args,
                 __cache__arg_idx__=_arg_idx,
                 __cache__kwarg_keys__=_kwarg_keys,
-                **kwargs,
+                **_kwargs,
             )
+            return value
 
         return wrapper
 
     return decorator
 
 
-def generate_simple_decorator(key: str, obj: object):
-    def decorator(func):
+def generate_simple_decorator(
+    key: str, obj: Any
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             if key not in kwargs:
                 kwargs[key] = obj
             return func(*args, **kwargs)

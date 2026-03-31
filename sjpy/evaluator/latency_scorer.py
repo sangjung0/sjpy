@@ -8,7 +8,7 @@
 
 # MODIFIED FROM ORIGINAL
 
-from typing import Sequence
+from collections.abc import Sequence
 
 
 def AL_score(
@@ -23,9 +23,9 @@ def AL_score(
     if delays[0] > source_length:
         return delays[0]
 
-    AL = 0
-    gamma = target_length / source_length  # 프레임당 이상적인 단어 생성 비율
-    tau = 0
+    AL: float = 0
+    gamma: float = target_length / source_length  # 프레임당 이상적인 단어 생성 비율
+    tau: int = 0
     for t_minus_1, d in enumerate(delays):
         # 이상적인 단어 생성 시간과 실제 단어 생성 시간의 차이
         AL += d - t_minus_1 / gamma
@@ -45,9 +45,9 @@ def LAAL_score(
     if delays[0] > source_length:
         return delays[0]
 
-    LAAL = 0
-    gamma = max(len(delays), target_length) / source_length
-    tau = 0
+    LAAL: float = 0
+    gamma: float = max(len(delays), target_length) / source_length
+    tau: int = 0
     for t_minus_1, d in enumerate(delays):
         LAAL += d - t_minus_1 / gamma
         tau = t_minus_1 + 1
@@ -59,10 +59,10 @@ def LAAL_score(
 
 
 def DAL_score(delays: Sequence[float], source_length: int) -> float:
-    DAL = 0
-    target_length = len(delays)
-    gamma = target_length / source_length
-    g_prime_last = 0
+    DAL: float = 0
+    target_length: int = len(delays)
+    gamma: float = target_length / source_length
+    g_prime_last: float = 0
     for i_minus_1, g in enumerate(delays):
         if i_minus_1 + 1 == 1:
             g_prime = g

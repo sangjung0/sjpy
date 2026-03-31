@@ -3,7 +3,8 @@ from __future__ import annotations
 import os
 import re
 
-from typing import Mapping
+from typing import Any
+from collections.abc import Mapping
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -12,11 +13,13 @@ PATTERN = re.compile(r"\$\{(\w+)(?::([^}]*))?\}")
 load_dotenv()
 
 
-def replace(d: dict, replace_data: Mapping[str, str] | None = None):
+def replace(
+    data: dict[Any, Any], replace_data: Mapping[str, str] | None = None
+) -> None:
     _replace_data = dict(replace_data or {})
     _replace_data.update(os.environ)
 
-    for k, v in d.items():
+    for k, v in data.items():
         if isinstance(v, dict):
             replace(v, _replace_data)
         elif isinstance(v, list):
@@ -26,7 +29,7 @@ def replace(d: dict, replace_data: Mapping[str, str] | None = None):
                 elif isinstance(v[idx], str):
                     v[idx] = PATTERN.sub(lambda m: replacer(m, _replace_data), v[idx])
         elif isinstance(v, str):
-            d[k] = PATTERN.sub(lambda m: replacer(m, _replace_data), v)
+            data[k] = PATTERN.sub(lambda m: replacer(m, _replace_data), v)
 
 
 def replacer(match: re.Match[str], replace_data: Mapping[str, str]) -> str:

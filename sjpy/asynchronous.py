@@ -4,7 +4,8 @@ import asyncio
 import inspect
 
 from logging import Logger
-from typing import Callable, TypeVar, Awaitable, Any, Coroutine
+from typing import TypeVar, Any
+from collections.abc import Awaitable, Callable, Coroutine
 
 from sjpy.excptn import exc_to_str
 
@@ -69,13 +70,13 @@ def spawn_task_with_callback_guarded(
     lock: asyncio.Lock,
     stop_event: asyncio.Event,
     logger: Logger | None = None,
-):
+) -> None:
     wrapped_task = task_with_callback_guarded(task, callback, lock, stop_event, logger)
     asyncio.create_task(wrapped_task)
 
 
 def spawn_task_queue_worker(
-    queue: asyncio.Queue[Awaitable | None],
+    queue: asyncio.Queue[Awaitable[Any] | None],
     lock: asyncio.Lock,
     stop_event: asyncio.Event,
     logger: Logger | None = None,
@@ -105,7 +106,7 @@ async def await_if_awaitable(aw: T | Awaitable[T]) -> T:
 
 
 def async_lambda(
-    func: Callable, *args, **kwargs
+    func: Callable[..., Any], *args: Any, **kwargs: Any
 ) -> Callable[[], Coroutine[None, None, Any]]:
     async def _func() -> Any:
         return await func(*args, **kwargs)

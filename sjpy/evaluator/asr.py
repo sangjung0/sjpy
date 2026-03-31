@@ -1,14 +1,17 @@
 import time
 import numpy as np
+import numpy.typing as npt
 
+from typing import Any
 from contextlib import contextmanager
 from typing_extensions import deprecated
+from collections.abc import Generator
 
 from sjpy.statistics import summarize_distribution
 
 
 @deprecated("Use sjpy.evaluator.latency_scorer.AL_scorer instead.")
-def compute_average_lagging(coverage: np.ndarray, L: float) -> float | None:
+def compute_average_lagging(coverage: npt.NDArray[Any], L: float) -> float | None:
     coverage = np.asarray(coverage, dtype=np.float32)
     if coverage.ndim != 1:
         raise ValueError("coverage must be a 1-dimensional array")
@@ -34,7 +37,7 @@ def compute_average_lagging(coverage: np.ndarray, L: float) -> float | None:
 
 
 @deprecated("Use sjpy.evaluator.latency_scorer.AP_scorer instead.")
-def compute_average_proportion(coverage: np.ndarray, L: float) -> float | None:
+def compute_average_proportion(coverage: npt.NDArray[Any], L: float) -> float | None:
     coverage = np.asarray(coverage, dtype=np.float32)
     if coverage.ndim != 1:
         raise ValueError("coverage must be a 1-dimensional array")
@@ -59,50 +62,50 @@ def compute_average_proportion(coverage: np.ndarray, L: float) -> float | None:
 
 @deprecated("Use sjpy.evaluator.latency_scorer instead.")
 class TimeEvaluator:
-    def __init__(self, L: float):
-        self.times = []
-        self.coverages = np.asarray([], dtype=np.float32)
-        self.L = L
+    def __init__(self, L: float) -> None:
+        self.times: list[float] = []
+        self.coverages: npt.NDArray[np.float32] = np.asarray([], dtype=np.float32)
+        self.L: float = L
 
     @contextmanager
-    def timeit(self):
+    def timeit(self) -> Generator[None, None, None]:
         start = time.time()
         try:
             yield
         finally:
             self.times.append(time.time() - start)
 
-    def add_coverage(self, coverage: np.ndarray):
+    def add_coverage(self, coverage: npt.NDArray[Any]) -> None:
         coverage = np.asarray(coverage, dtype=np.float32)
         self.coverages = np.concatenate([self.coverages, coverage], axis=0)
 
-    def metric(self):
+    def metric(self) -> dict[str, Any]:
         return {
             "average_lagging": self.get_avg_lagging(),
             "average_proportion": self.get_avg_proportion(),
             "time_stats": summarize_distribution(self.times),
         }
 
-    def get_avg_lagging(self):
+    def get_avg_lagging(self) -> float | None:
         return compute_average_lagging(self.coverages, self.L)
 
-    def get_avg_proportion(self):
+    def get_avg_proportion(self) -> float | None:
         return compute_average_proportion(self.coverages, self.L)
 
 
 @deprecated("Use sjpy.evaluator.latency_scorer instead.")
 class TimeEvaluatorSummary:
-    def __init__(self):
-        self.times = []
-        self.als = []
-        self.aps = []
+    def __init__(self) -> None:
+        self.times: list[float] = []
+        self.als: list[float | None] = []
+        self.aps: list[float | None] = []
 
-    def add(self, evaluator: TimeEvaluator):
+    def add(self, evaluator: TimeEvaluator) -> None:
         self.times.extend(evaluator.times)
         self.als.append(evaluator.get_avg_lagging())
         self.aps.append(evaluator.get_avg_proportion())
 
-    def metric(self):
+    def metric(self) -> dict[str, Any]:
         als = [x for x in self.als if x is not None]
         aps = [x for x in self.aps if x is not None]
         average_lagging_stats = summarize_distribution(als)

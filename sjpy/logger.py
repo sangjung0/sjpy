@@ -11,7 +11,7 @@ def generate(
     level: int = logging.INFO,
     path: str | Path | None = None,
     file_log_level: int = logging.DEBUG,
-):
+) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(min(level, file_log_level))
     logger.propagate = False

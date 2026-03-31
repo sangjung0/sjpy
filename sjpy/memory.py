@@ -20,8 +20,8 @@ def _sampler_proc(
     sample_ms: int,
     include_children: bool,
     stop_evt: synchronize.Event | threading.Event,
-    out_q: mp.Queue | Queue,
-):
+    out_q: mp.Queue[dict[str, int | float]] | Queue[dict[str, int | float]],
+) -> None:
     peak_rss = 0
     peak_uss = 0
     samples = 0
@@ -48,8 +48,8 @@ def _sampler_proc(
 
 
 def _mem_of(pid: int, include_children: bool = False) -> dict[str, int]:
-    rss = 0
-    uss = 0
+    rss: int = 0
+    uss: int = 0
     try:
         p = psutil.Process(pid)
         procs = [p] + (p.children(recursive=True) if include_children else [])
@@ -85,13 +85,15 @@ class MemScope(ContextDecorator):
 
         self._target_pid: int = os.getpid()
         self._stop_evt: synchronize.Event | threading.Event | None = None
-        self._queue: mp.Queue | Queue | None = None
+        self._queue: (
+            mp.Queue[dict[str, float | int]] | Queue[dict[str, float | int]] | None
+        ) = None
         self._worker: mp.Process | threading.Thread | None = None
 
         self._t0: float | None = None
         self.stats: dict[str, float | int | str] = {}
 
-    def _proc_work(self):
+    def _proc_work(self) -> None:
         self._stop_evt = mp.Event()
         self._queue = mp.Queue(maxsize=1)
         self._worker = mp.Process(
@@ -107,7 +109,7 @@ class MemScope(ContextDecorator):
         )
         self._worker.start()
 
-    def _thread_work(self):
+    def _thread_work(self) -> None:
         self._stop_evt = threading.Event()
         self._queue = Queue(maxsize=1)
         self._worker = threading.Thread(
@@ -123,7 +125,7 @@ class MemScope(ContextDecorator):
         )
         self._worker.start()
 
-    def __enter__(self):
+    def __enter__(self) -> MemScope:
         gc.collect()
         self._start = _mem_of(self._target_pid, self.include_children)
         if self.backend == "process":
@@ -135,7 +137,7 @@ class MemScope(ContextDecorator):
         self._t0 = time.perf_counter()
         return self
 
-    def __exit__(self, exc_type, exc, tb):
+    def __exit__(self, exc_type, exc, tb) -> bool | None:  # type: ignore[no-untyped-def, exit-return]
         assert self._stop_evt is not None
         assert self._worker is not None
         assert self._queue is not None
