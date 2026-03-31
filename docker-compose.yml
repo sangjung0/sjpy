@@ -1,0 +1,42 @@
+# Author: SangJeong Kim
+# Last Modified: 2026-03-31
+
+name: ${CONTAINER_NAME}
+services:
+  service:
+    user: "${CONTAINER_UID}:${CONTAINER_UID}"
+    shm_size: ${CONTAINER_SHM_SIZE}
+    container_name: ${CONTAINER_NAME}_service
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        CONTAINER_USER: ${CONTAINER_USER}
+        CONTAINER_UID: ${CONTAINER_UID}
+        CONTAINER_HOME: ${CONTAINER_HOME}
+    env_file:
+      - ./.env
+    volumes:
+      - ./:${CONTAINER_WORK_DIR}
+      - venv:${CONTAINER_WORK_DIR}/.venv
+
+      # cache
+      - uv_cache:${CONTAINER_HOME}/.cache/uv:rw
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["${CONTAINER_GPU_ID}"]
+              capabilities: [gpu]
+    command: sleep infinity
+
+volumes:
+  venv:
+    driver: local
+  uv_cache:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${CONTAINER_VOLUME}/cache/uv

@@ -1,3 +1,6 @@
+# Author: SangJeong Kim
+# Last Modified: 2026-03-30
+
 FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -22,10 +25,11 @@ RUN ${SCRIPT_PATH}/root/setup_zsh_for_user.sh ${CONTAINER_USER}
 
 # CLEANUP
 RUN rm -rf /tmp/* || true
+ENV DEBIAN_FRONTEND=dialog
 
 # SWITCH USER
 USER ${CONTAINER_USER}
 
 # INSTALL UV
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="${CONTAINER_HOME}/.local/bin:$PATH"
+ENV PATH="${CONTAINER_HOME}/.uv/bin:$PATH"

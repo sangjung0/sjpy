@@ -1,16 +1,122 @@
+// Author: SangJeong Kim
+// Last Modified: 2026-03-30
+
 {
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "pytest",
+            "label": "python: run (-O no asserts)",
             "type": "shell",
-            "command": "${workspaceFolder}/.venv/bin/python -m pytest -q",
+            "command": "${command:python.interpreterPath}",
+            "args": ["-O", "${file}"],
+            "options": {
+                "envFile": "${workspaceFolder}/.env"
+            },
+            "problemMatcher": [],
+            "presentation": { "reveal": "always", "panel": "dedicated" }
+        },
+        {
+            "label": "python: run (-OO no asserts + no docstrings)",
+            "type": "shell",
+            "command": "${command:python.interpreterPath}",
+            "args": ["-OO", "${file}"],
+            "options": {
+                "envFile": "${workspaceFolder}/.env"
+            },
+            "problemMatcher": [],
+            "presentation": { "reveal": "always", "panel": "dedicated" }
+        },
+        {
+            "label": "python: clean pycache",
+            "type": "shell",
+            "command": "find . -type d -name '__pycache__' -prune -exec rm -rf {} + && find . -type f -name '*.py[co]' -delete",
+            "problemMatcher": []
+        },
+        {
+            "label": "python: ruff",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/python",
+            "args": ["-m", "ruff", "check", "."],
             "problemMatcher": [],
             "presentation": {
                 "reveal": "always",
                 "panel": "shared",
                 "clear": true
             }
+        },
+        {
+            "label": "python: mypy",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/python",
+            "args": ["-m", "mypy", "dataset_loader", "tests"],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
+        },
+        {
+            "label": "python: static analysis (ruff + mypy)",
+            "dependsOn": ["python: ruff", "python: mypy"],
+            "dependsOrder": "sequence",
+            "problemMatcher": []
+        },
+        {
+            "label": "pytest: all",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/python",
+            "args": ["-m", "pytest", "-q", "--durations=0"],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
+        },
+        {
+            "label": "pytest: all -v",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/python",
+            "args": ["-m", "pytest", "-q", "--durations=0", "-v"],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
+        },
+        {
+            "label": "pytest: pick file",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/python",
+            "args": ["-m", "pytest", "-q", "--durations=0", "${input:nodeid}"],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
+        },
+        {
+            "label": "pytest: current file",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/python",
+            "args": ["-m", "pytest", "-q", "--durations=0", "${relativeFile}"],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
+        }
+    ],
+    "inputs": [
+        {
+            "id": "nodeid",
+            "type": "promptString",
+            "description": "테스트할 파일/노드ID 입력 (예: tests/unit/test_foo.py 또는 tests/unit/test_foo.py::TestBar::test_baz)",
+            "default": "tests/unit"
         }
     ]
 }

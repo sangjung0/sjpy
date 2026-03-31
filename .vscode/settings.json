@@ -1,14 +1,17 @@
+// Author: SangJeong Kim
+// Last Modified: 2026-03-31
+
 {
     "code-runner.runInTerminal": true,
     "code-runner.executorMap": {
-        "python":"zsh -c 'set -a && source $workspaceRoot/.env && exec $workspaceRoot/.venv/bin/python -u $fullFileName'"
+        "python": "zsh -c 'set -a && source $workspaceRoot/.env && exec $workspaceRoot/.venv/bin/python -u $fullFileName'"
     },
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,
         "**/.hg": true,
         "**/.DS_Store": true,
-        "**/Thumbs.db": true,
+        "**/Thumbs.db": true
     },
     "search.exclude": {
         "**/.git": true,
@@ -23,7 +26,7 @@
         "**/.git/subtree-cache/**": true,
         "**/.hg/store/**": true,
         "**/.venv/**": true,
-        "**/__pycache__/**": true,
+        "**/__pycache__/**": true
     },
     "python.analysis.exclude": [
         "**/.git",
@@ -31,7 +34,7 @@
         "**/__pycache__",
         "**/output",
         "**/log",
-        "**/.venv",
+        "**/.venv"
     ],
     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
     "python.envFile": "${workspaceFolder}/.env",
@@ -59,11 +62,32 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.tabSize": 4,
         "editor.insertSpaces": true,
-        "files.trimTrailingWhitespace": false,
+        "files.trimTrailingWhitespace": false
     },
-    "cSpell.words": [
-        "sjpy",
-        "sjsh",
-        "venv"
-    ]
+    "[yaml]": {
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
+    "[dockerfile]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format"
+    },
+    "[shellscript]": {
+        "editor.defaultFormatter": "foxundermoon.shell-format"
+    },
+    "[env]": {
+        "editor.defaultFormatter": "dotenv.dotenv-vscode"
+    },
+    "files.associations": {
+        ".env": "env",
+        ".env.*": "env"
+    },
+    "[toml]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "cSpell.words": ["sjpy", "sjsh", "venv"]
 }

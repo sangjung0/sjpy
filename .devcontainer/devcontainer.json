@@ -1,6 +1,9 @@
+// Author: SangJeong Kim
+// Last Modified: 2026-03-30
+
 {
 	"name": "sjpy_dev",
-	"dockerComposeFile": "./docker-compose.yml",
+	"dockerComposeFile": "../docker-compose.yml",
 	"service": "service",
     "remoteUser": "root",
 	"workspaceFolder": "/workspaces/sjpy",
@@ -24,26 +27,58 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-                "ms-python.vscode-pylance",
-                "ms-python.python",
-                "ms-python.debugpy",
-                "rsip-vision.nvidia-smi-plus",
-                "ms-vscode.azurecli",
-                "esbenp.prettier-vscode",
-                "ms-toolsai.jupyter",
-                "njpwerner.autodocstri",
-                "formulahendry.code-runner",
-                "streetsidesoftware.code-spell-checker",
-                "naumovs.color-highlight",
-                "oderwat.indent-rainbow",
-                "ionutvmi.path-autocomplete",
-                "mgesbert.python-path",
-                "foxundermoon.shell-format",
-                "gruntfuggly.todo-tree",
-                "editorconfig.editorconfig",
-                "ms-python.black-formatter",
-                "jebbs.plantuml",
-                "claudineyqr.plantuml-snippets"
+        // Copilot
+        "github.copilot",
+        // Codex
+        "openai.chatgpt",
+
+        // Python
+        // Python 언어 서버(Pylance). 타입 분석, 자동완성, 힌트 제공.
+        "ms-python.vscode-pylance",
+        // Python 확장 메인. 가상환경, 디버깅, 실행, 포매터/린터 관리.
+        "ms-python.python",
+        // Python 디버거(debugpy) 지원.
+        "ms-python.debugpy",
+        // Python import path 자동 수정 / 관리 기능.
+        "mgesbert.python-path",
+        // Python 포매터. Python 포매팅.
+        "ms-python.black-formatter", // black formatter
+        // "ms-python.autopep8", // autopep8 formatter
+        // Jupyter Notebook(.ipynb) 지원. VSCode에서 셀 실행·커널 관리.
+        "ms-toolsai.jupyter",
+        // Python docstring 자동 생성기. 함수 정의 시 자동으로 docstring 삽입.
+        "njpwerner.autodocstri",
+        // Python - end
+
+        // 기타 포매터
+        // Prettier 포매터 (JS/TS/JSON/Markdown/TOML 등).
+        "esbenp.prettier-vscode",
+        // shfmt 기반 Shell/Dockerfile 포매터.
+        "foxundermoon.shell-format",
+        // .editorconfig 규칙 자동 적용/해석.
+        "editorconfig.editorconfig",
+        // yaml support & formatter
+        "redhat.vscode-yaml",
+        // .env & dotenv support
+        "dotenv.dotenv-vscode",
+        // 기타 포매터 -- end
+
+        // GPU 정보 확인 확장. nvidia-smi 결과를 UI로 보여줌.
+        "rsip-vision.nvidia-smi-plus",
+        // Azure CLI 명령어 지원. 명령어 자동완성·하이라이트 등 제공.
+        "ms-vscode.azurecli",
+        // Code Runner. Python/Zsh 등 단일 파일 빠른 실행.
+        "formulahendry.code-runner",
+        // 맞춤법/오타 검사기(cSpell). 단어 하이라이트 + 사용자 사전 지원.
+        "streetsidesoftware.code-spell-checker",
+        // CSS/JS/TS 등에서 색상(hex/rgb 등) 하이라이트.
+        "naumovs.color-highlight",
+        // 들여쓰기 색깔로 보여주는 Rainbow indent.
+        "oderwat.indent-rainbow",
+        // 파일 경로 자동완성 개선. 상대/절대 경로 탐색 향상.
+        "ionutvmi.path-autocomplete",
+        // T_ODO/FIXME 트리뷰 제공. 프로젝트 전체 TODO를 한눈에 관리.
+        "gruntfuggly.todo-tree"
 			]
 		}
 	}

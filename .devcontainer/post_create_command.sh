@@ -1,3 +1,6 @@
+# Author: SangJeong Kim
+# Last Modified: 2026-03-31
+
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -25,3 +28,5 @@ sudo bash "${CONTAINER_WORK_DIR}/.devcontainer/sjsh/root/change_owner.sh" "${CON
 echo "[INFO] step 2/2: sync uv"
 bash "${CONTAINER_WORK_DIR}/.devcontainer/sjsh/common/wait_for_dir.sh" "${CONTAINER_WORK_DIR}/.venv"
 bash "${CONTAINER_WORK_DIR}/.devcontainer/sjsh/user/sync_uv.sh" "${CONTAINER_WORK_DIR}" "${CONTAINER_UV_GROUP}"
+
+echo "[INFO] post-create command completed successfully."

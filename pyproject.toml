@@ -14,10 +14,6 @@ dependencies = [
     "scipy>=1.15.3",
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["sjpy*"]
-
 [dependency-groups]
 dev = [
     "ipykernel>=7.1.0",
@@ -25,3 +21,16 @@ dev = [
     "jupyterlab>=4.4.10",
     "notebook>=7.4.7",
 ]
+test = [
+    "pytest>=9.0.2",
+    "pytest-dotenv>=0.5.2",
+    "ruff>=0.15.8",
+]
+
+[tool.pytest.ini_options]
+env_files=[".env"]
+addopts = "--ignore=tests/scripts"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sjpy*"]
