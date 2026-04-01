@@ -7,6 +7,7 @@ import threading
 import psutil
 import multiprocessing as mp
 
+from typing import TypedDict
 from multiprocessing import synchronize
 from contextlib import ContextDecorator
 from queue import Queue
@@ -15,18 +16,48 @@ from logging import Logger
 from sjpy.logger import generate
 
 
+class RssUss(TypedDict):
+    rss: int
+    uss: int
+
+
+class SampleStats(TypedDict):
+    peak_rss: int
+    peak_uss: int
+    samples: int
+    duration: float
+
+
+class MemStats(TypedDict):
+    rss_start: int
+    rss_end: int
+    rss_delta: int
+    rss_peak_in_block: int
+    rss_peak_over_start_delta: int
+    uss_start: int
+    uss_end: int
+    uss_delta: int
+    uss_peak_in_block: int
+    uss_peak_over_start_delta: int
+    duration_s: float
+    samples: int
+    include_children: bool
+    backend: str
+    sample_ms: int
+
+
 def _sampler_proc(
     pid: int,
     sample_ms: int,
     include_children: bool,
     stop_evt: synchronize.Event | threading.Event,
-    out_q: mp.Queue[dict[str, int | float]] | Queue[dict[str, int | float]],
+    out_q: mp.Queue[SampleStats] | Queue[SampleStats],
 ) -> None:
-    peak_rss = 0
-    peak_uss = 0
-    samples = 0
-    start_t = time.perf_counter()
-    sleep_s = max(sample_ms, 1) / 1000.0
+    peak_rss: int = 0
+    peak_uss: int = 0
+    samples: int = 0
+    start_t: float = time.perf_counter()
+    sleep_s: float = max(sample_ms, 1) / 1000.0
     while not stop_evt.is_set():
         m = _mem_of(pid, include_children)
         if m["rss"] > peak_rss:
@@ -35,7 +66,7 @@ def _sampler_proc(
             peak_uss = m["uss"]
         samples += 1
         time.sleep(sleep_s)
-    duration = time.perf_counter() - start_t
+    duration: float = time.perf_counter() - start_t
     out_q.put(
         {
             "peak_rss": peak_rss,
@@ -47,7 +78,7 @@ def _sampler_proc(
     )
 
 
-def _mem_of(pid: int, include_children: bool = False) -> dict[str, int]:
+def _mem_of(pid: int, include_children: bool = False) -> RssUss:
     rss: int = 0
     uss: int = 0
     try:
@@ -85,13 +116,27 @@ class MemScope(ContextDecorator):
 
         self._target_pid: int = os.getpid()
         self._stop_evt: synchronize.Event | threading.Event | None = None
-        self._queue: (
-            mp.Queue[dict[str, float | int]] | Queue[dict[str, float | int]] | None
-        ) = None
+        self._queue: mp.Queue[SampleStats] | Queue[SampleStats] | None = None
         self._worker: mp.Process | threading.Thread | None = None
 
         self._t0: float | None = None
-        self.stats: dict[str, float | int | str] = {}
+        self.stats: MemStats = {
+            "rss_start": -1,
+            "rss_end": -1,
+            "rss_delta": -1,
+            "rss_peak_in_block": -1,
+            "rss_peak_over_start_delta": -1,
+            "uss_start": -1,
+            "uss_end": -1,
+            "uss_delta": -1,
+            "uss_peak_in_block": -1,
+            "uss_peak_over_start_delta": -1,
+            "duration_s": -1,
+            "samples": -1,
+            "include_children": self.include_children,
+            "backend": self.backend,
+            "sample_ms": self.sample_ms,
+        }
 
     def _proc_work(self) -> None:
         self._stop_evt = mp.Event()
@@ -154,26 +199,26 @@ class MemScope(ContextDecorator):
             msg = self._queue.get_nowait()
         except Exception as e:
             self.logger.warning(f"[MemScope]: unable to get stats from worker: {e}")
-            msg = {}
-
-        peak_rss = msg.get("peak_rss", None) or max(self._start["rss"], end["rss"])
-        peak_uss = msg.get("peak_uss", None) or max(self._start["uss"], end["uss"])
-        samples = msg.get("samples", None) or 0
-        duration = msg.get("duration", None) or (time.perf_counter() - self._t0)
+            msg = {
+                "peak_rss": max(self._start["rss"], end["rss"]),
+                "peak_uss": max(self._start["uss"], end["uss"]),
+                "samples": 0,
+                "duration": time.perf_counter() - self._t0,
+            }
 
         self.stats = {
             "rss_start": self._start["rss"],
             "rss_end": end["rss"],
             "rss_delta": end["rss"] - self._start["rss"],
-            "rss_peak_in_block": peak_rss,
-            "rss_peak_over_start_delta": peak_rss - self._start["rss"],
+            "rss_peak_in_block": msg["peak_rss"],
+            "rss_peak_over_start_delta": msg["peak_rss"] - self._start["rss"],
             "uss_start": self._start["uss"],
             "uss_end": end["uss"],
             "uss_delta": end["uss"] - self._start["uss"],
-            "uss_peak_in_block": peak_uss,
-            "uss_peak_over_start_delta": peak_uss - self._start["uss"],
-            "duration_s": duration,
-            "samples": samples,
+            "uss_peak_in_block": msg["peak_uss"],
+            "uss_peak_over_start_delta": msg["peak_uss"] - self._start["uss"],
+            "duration_s": msg["duration"],
+            "samples": msg["samples"],
             "include_children": self.include_children,
             "backend": self.backend,
             "sample_ms": self.sample_ms,
@@ -184,16 +229,16 @@ class MemScope(ContextDecorator):
 
         log = (
             "[MemScope]\n"
-            f"  RSS: start={mib(self.stats['rss_start']):.1f} MiB, "  # type: ignore
-            f"end={mib(self.stats['rss_end']):.1f} MiB, "  # type: ignore
-            f"delta={mib(self.stats['rss_delta']):+.1f} MiB, "  # type: ignore
-            f"peak={mib(self.stats['rss_peak_in_block']):.1f} MiB "  # type: ignore
-            f"(+{mib(self.stats['rss_peak_over_start_delta']):.1f} over start)\n"  # type: ignore
-            f"  USS: start={mib(self.stats['uss_start']):.1f} MiB, "  # type: ignore
-            f"end={mib(self.stats['uss_end']):.1f} MiB, "  # type: ignore
-            f"delta={mib(self.stats['uss_delta']):+.1f} MiB, "  # type: ignore
-            f"peak={mib(self.stats['uss_peak_in_block']):.1f} MiB "  # type: ignore
-            f"(+{mib(self.stats['uss_peak_over_start_delta']):.1f} over start)\n"  # type: ignore
+            f"  RSS: start={mib(self.stats['rss_start']):.1f} MiB, "
+            f"end={mib(self.stats['rss_end']):.1f} MiB, "
+            f"delta={mib(self.stats['rss_delta']):+.1f} MiB, "
+            f"peak={mib(self.stats['rss_peak_in_block']):.1f} MiB "
+            f"(+{mib(self.stats['rss_peak_over_start_delta']):.1f} over start)\n"
+            f"  USS: start={mib(self.stats['uss_start']):.1f} MiB, "
+            f"end={mib(self.stats['uss_end']):.1f} MiB, "
+            f"delta={mib(self.stats['uss_delta']):+.1f} MiB, "
+            f"peak={mib(self.stats['uss_peak_in_block']):.1f} MiB "
+            f"(+{mib(self.stats['uss_peak_over_start_delta']):.1f} over start)\n"
             f"  samples={self.stats['samples']}, "
             f"duration={self.stats['duration_s']:.2f}s, "
             f"backend={self.stats['backend']}, children={self.stats['include_children']}"

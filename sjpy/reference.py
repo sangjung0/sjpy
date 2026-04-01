@@ -4,8 +4,7 @@ import importlib.util
 import inspect
 
 from pathlib import Path
-from typing import Any
-from collections.abc import Mapping
+from typing import Any, TypedDict, cast
 
 
 def get_top_package_root(depth: int = 1) -> None | Path:
@@ -30,7 +29,12 @@ def get_top_package_root(depth: int = 1) -> None | Path:
     return None
 
 
-def import_from(data: Mapping[str, Any]) -> type[Any]:
+class ImportData(TypedDict):
+    module: str
+    qualname: str
+
+
+def import_from(data: ImportData) -> type[Any]:
     import sys
     from importlib import import_module
     from functools import reduce
@@ -40,7 +44,7 @@ def import_from(data: Mapping[str, Any]) -> type[Any]:
         m = sys.modules[module]
     else:
         m = import_module(module)
-    _class: type[Any] = reduce(getattr, qual.split("."), m)  # type: ignore[assignment]
+    _class = cast(type[Any], reduce(getattr, qual.split("."), m))
     return _class
 
 

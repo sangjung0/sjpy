@@ -110,8 +110,8 @@ class TimeEvaluatorSummary:
         aps = [x for x in self.aps if x is not None]
         average_lagging_stats = summarize_distribution(als)
         average_proportion_stats = summarize_distribution(aps)
-        average_lagging_stats["count_null"] = len(self.als) - len(als)
-        average_proportion_stats["count_null"] = len(self.aps) - len(aps)
+        average_lagging_stats["count_null"] = len(self.als) - len(als)  # type: ignore[typeddict-unknown-key]
+        average_proportion_stats["count_null"] = len(self.aps) - len(aps)  # type: ignore[typeddict-unknown-key]
         return {
             "average_lagging_stats": average_lagging_stats,
             "average_proportion_stats": average_proportion_stats,

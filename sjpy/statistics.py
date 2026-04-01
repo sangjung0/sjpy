@@ -3,10 +3,30 @@ from __future__ import annotations
 import math
 import numpy as np
 
-from typing import Any
+from typing import TypedDict
 from collections.abc import Sequence
 
 from scipy.stats import skew, kurtosis
+
+
+class HistogramSummary(TypedDict):
+    bin_edges: list[float]
+    bin_probs: list[float]
+
+
+class DistributionSummary(TypedDict):
+    n: int
+    mean: float | None
+    std: float | None
+    min: float | None
+    q1: float | None
+    q2: float | None
+    q3: float | None
+    max: float | None
+    iqr: float | None
+    skew: float | None
+    kurtosis: float | None
+    histogram: HistogramSummary
 
 
 def update_mean_std(
@@ -39,7 +59,7 @@ def update_mean_std(
 def summarize_distribution(
     data: Sequence[int | float],
     hist_bins: int = 10,
-) -> dict[str, Any]:
+) -> DistributionSummary:
     if len(data) == 0:
         return {
             "n": 0,
@@ -97,4 +117,6 @@ def summarize_distribution(
 __all__ = [
     "update_mean_std",
     "summarize_distribution",
+    "DistributionSummary",
+    "HistogramSummary",
 ]

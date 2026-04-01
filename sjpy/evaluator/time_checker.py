@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import time
 
-from typing import Any
 from contextlib import contextmanager
 from collections.abc import Generator
 
-from sjpy.statistics import summarize_distribution
+from sjpy.statistics import summarize_distribution, DistributionSummary
 
 
 class TimeChecker:
@@ -25,7 +24,7 @@ class TimeChecker:
             elapsed = time.perf_counter() - start
             self.__times.append(elapsed)
 
-    def metric(self) -> dict[str, Any]:
+    def metric(self) -> DistributionSummary:
         return summarize_distribution(self.__times)
 
 
