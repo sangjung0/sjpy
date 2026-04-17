@@ -199,12 +199,12 @@ class MemScope(ContextDecorator):
             msg = self._queue.get_nowait()
         except Exception as e:
             self.logger.warning(f"[MemScope]: unable to get stats from worker: {e}")
-            msg = {
-                "peak_rss": max(self._start["rss"], end["rss"]),
-                "peak_uss": max(self._start["uss"], end["uss"]),
-                "samples": 0,
-                "duration": time.perf_counter() - self._t0,
-            }
+            msg = SampleStats(
+                peak_rss=max(self._start["rss"], end["rss"]),
+                peak_uss=max(self._start["uss"], end["uss"]),
+                samples=0,
+                duration=time.perf_counter() - self._t0,
+            )
 
         self.stats = {
             "rss_start": self._start["rss"],

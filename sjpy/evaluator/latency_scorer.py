@@ -23,18 +23,18 @@ def AL_score(
     if delays[0] > source_length:
         return delays[0]
 
-    AL: float = 0
+    al: float = 0
     gamma: float = target_length / source_length  # 프레임당 이상적인 단어 생성 비율
     tau: int = 0
     for t_minus_1, d in enumerate(delays):
         # 이상적인 단어 생성 시간과 실제 단어 생성 시간의 차이
-        AL += d - t_minus_1 / gamma
+        al += d - t_minus_1 / gamma
         tau = t_minus_1 + 1
 
         if d >= source_length:
             break
-    AL /= tau  # 이상적인 단어 생성 시간 대비 평균 지연 시간
-    return AL
+    al /= tau  # 이상적인 단어 생성 시간 대비 평균 지연 시간
+    return al
 
 
 def LAAL_score(
@@ -45,21 +45,21 @@ def LAAL_score(
     if delays[0] > source_length:
         return delays[0]
 
-    LAAL: float = 0
+    laal: float = 0
     gamma: float = max(len(delays), target_length) / source_length
     tau: int = 0
     for t_minus_1, d in enumerate(delays):
-        LAAL += d - t_minus_1 / gamma
+        laal += d - t_minus_1 / gamma
         tau = t_minus_1 + 1
 
         if d >= source_length:
             break
-    LAAL /= tau
-    return LAAL
+    laal /= tau
+    return laal
 
 
 def DAL_score(delays: Sequence[float], source_length: int) -> float:
-    DAL: float = 0
+    dal: float = 0
     target_length: int = len(delays)
     gamma: float = target_length / source_length
     g_prime_last: float = 0
@@ -71,11 +71,11 @@ def DAL_score(delays: Sequence[float], source_length: int) -> float:
             # 따라서, 높은 지연만을 반영하게 됨
             g_prime = max([g, g_prime_last + 1 / gamma])
 
-        DAL += g_prime - i_minus_1 / gamma
+        dal += g_prime - i_minus_1 / gamma
         g_prime_last = g_prime
 
-    DAL /= target_length
-    return DAL
+    dal /= target_length
+    return dal
 
 
 def AP_score(

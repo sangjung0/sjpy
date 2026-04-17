@@ -8,8 +8,6 @@ from typing import Any
 
 
 def numpy_to_base64(array: npt.NDArray[Any]) -> str:
-    if array is None:
-        return ""
     return base64.b64encode(array.tobytes()).decode("utf-8")
 
 

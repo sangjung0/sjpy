@@ -33,7 +33,7 @@ class YamlSaver:
     def save(
         self, data: Mapping[Any, Any], filepath: Path, verbose: bool = True
     ) -> None:
-        output = {
+        output: dict[str, Any] = {
             "metadata": {
                 "description": self.description,
                 "generated_date": self._get_current_time_dict(),

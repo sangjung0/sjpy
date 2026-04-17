@@ -1,10 +1,14 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TypeAlias
 from types import SimpleNamespace
 
+Scalar: TypeAlias = str | int | float | bool | None
+JsonLike: TypeAlias = Scalar | dict[str, "JsonLike"] | list["JsonLike"]
+NamespaceLike: TypeAlias = Scalar | SimpleNamespace | list["NamespaceLike"]
 
-def to_namespace(d: Any) -> Any:
+
+def to_namespace(d: JsonLike) -> NamespaceLike:
     if isinstance(d, dict):
         return SimpleNamespace(**{k: to_namespace(v) for k, v in d.items()})
     elif isinstance(d, list):
@@ -13,7 +17,7 @@ def to_namespace(d: Any) -> Any:
         return d
 
 
-def namespace_to_dict(ns: Any) -> dict[Any, Any] | list[Any] | Any:
+def namespace_to_dict(ns: NamespaceLike) -> JsonLike:
     if isinstance(ns, SimpleNamespace):
         return {k: namespace_to_dict(v) for k, v in ns.__dict__.items()}
     elif isinstance(ns, list):
@@ -22,7 +26,4 @@ def namespace_to_dict(ns: Any) -> dict[Any, Any] | list[Any] | Any:
         return ns
 
 
-__all__ = [
-    "to_namespace",
-    "namespace_to_dict",
-]
+__all__ = ["to_namespace", "namespace_to_dict"]

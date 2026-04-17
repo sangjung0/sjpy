@@ -87,10 +87,14 @@ class TimeEvaluator:
         }
 
     def get_avg_lagging(self) -> float | None:
-        return compute_average_lagging(self.coverages, self.L)
+        return compute_average_lagging(  # pyright: ignore[reportDeprecated]
+            self.coverages, self.L
+        )
 
     def get_avg_proportion(self) -> float | None:
-        return compute_average_proportion(self.coverages, self.L)
+        return compute_average_proportion(  # pyright: ignore[reportDeprecated]
+            self.coverages, self.L
+        )
 
 
 @deprecated("Use sjpy.evaluator.latency_scorer instead.")
@@ -100,7 +104,9 @@ class TimeEvaluatorSummary:
         self.als: list[float | None] = []
         self.aps: list[float | None] = []
 
-    def add(self, evaluator: TimeEvaluator) -> None:
+    def add(
+        self, evaluator: TimeEvaluator  # pyright: ignore[reportDeprecated]
+    ) -> None:
         self.times.extend(evaluator.times)
         self.als.append(evaluator.get_avg_lagging())
         self.aps.append(evaluator.get_avg_proportion())

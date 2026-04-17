@@ -1,3 +1,5 @@
+# pyright: reportUnknownParameterType=false, reportMissingParameterType=false, reportUnknownMemberType=false, reportUnknownLambdaType=false, reportUnknownArgumentType=false, reportAttributeAccessIssue=false
+
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
@@ -70,7 +72,7 @@ def _make_numeric(
     for name, op in _UNARY_OPS.items():  # type: ignore[assignment]
 
         @wraps(op)
-        def f1(self, _op: Callable[[Any], Any] = op) -> Any:  # type: ignore[no-untyped-def, assignment]
+        def f1(self, _op: Callable[[Any], Any] = op) -> Any:  # type: ignore[assignment, no-untyped-def]
             return _op(caster(self.value))
 
         setattr(cls, name, f1)
@@ -89,7 +91,7 @@ def _make_numeric(
     cls.__float__ = lambda self: float(self.value)
     if is_int:
         cls.__index__ = lambda self: int(self.value)  # range(), list[x] 등에 필요
-    cls.__repr__ = lambda self: f"{cls.__class__.__name__}({self.value})"  # type: ignore
+    cls.__repr__ = lambda self: f"{cls.__class__.__name__}({self.value})"  # type: ignore[assignment, misc]
 
     return cls
 

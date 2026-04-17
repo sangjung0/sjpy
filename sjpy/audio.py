@@ -1,3 +1,5 @@
+# pyright: reportUnknownMemberType=false, reportUnknownArgumentType=false, reportMissingTypeStubs=false, reportUnknownVariableType=false
+
 from __future__ import annotations
 
 import ffmpeg
@@ -10,7 +12,7 @@ import numpy.typing as npt
 import soundfile as sf
 
 from types import ModuleType
-from typing import Any
+from typing import Any, cast
 from scipy.io import wavfile
 from scipy.signal import resample_poly
 
@@ -51,15 +53,15 @@ def load_from_mp4_file(
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=wavfile.WavFileWarning)
-        sample_rate, waveform = wavfile.read(io.BytesIO(out))  # may return int or float
+        sample_rate, waveform = wavfile.read(io.BytesIO(out))
 
     desired = np.dtype(dtype)
 
     if np.issubdtype(desired, np.floating):
         if np.issubdtype(waveform.dtype, np.integer):
             info = np.iinfo(waveform.dtype)
-            scale = max(abs(info.min), info.max)
-            waveform = waveform.astype(np.float32) / float(scale)
+            scale = float(max(abs(info.min), info.max))
+            waveform = waveform.astype(np.float32) / scale
         elif not np.issubdtype(waveform.dtype, np.floating):
             waveform = waveform.astype(np.float32)
         waveform = waveform.astype(desired, copy=False)
@@ -67,7 +69,7 @@ def load_from_mp4_file(
     elif np.issubdtype(desired, np.integer):
         if np.issubdtype(waveform.dtype, np.floating):
             info = np.iinfo(dtype)
-            scale = float(info.max)  # type: ignore[assignment]
+            scale = float(info.max)
             waveform = np.clip(waveform, -1.0, 1.0)
             waveform = (waveform * scale).round().astype(desired)
         else:
@@ -251,11 +253,11 @@ def np_to_wav(audio: npt.NDArray[Any], sample_rate: int) -> bytes:
 
 
 def audio_bytes_to_np(bt: bytes, sample_rate: int) -> npt.NDArray[Any]:
-    audio: npt.NDArray[Any]
     with io.BytesIO(bt) as buffer:
         audio, sr = sf.read(buffer, dtype="float32")
     if sr != sample_rate:
         audio = resample_poly(audio, sample_rate, sr)
+    audio = cast(npt.NDArray[Any], audio)
     return audio
 
 

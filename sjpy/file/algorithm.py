@@ -8,32 +8,54 @@ from collections.abc import Mapping
 from dotenv import load_dotenv
 from pathlib import Path
 
-PATTERN = re.compile(r"\$\{(\w+)(?::([^}]*))?\}")
-
 load_dotenv()
 
 
+PATTERN = re.compile(r"\$\{(\w+)(?::([^}]*))?\}")
+
+
 def replace(
-    data: dict[Any, Any], replace_data: Mapping[str, str] | None = None
-) -> None:
+    data: dict[Any, Any],
+    replace_data: Mapping[str, str] | None = None,
+    *,
+    inplace: bool = False,
+) -> dict[Any, Any]:
     _replace_data = dict(replace_data or {})
     _replace_data.update(os.environ)
 
-    for k, v in data.items():
-        if isinstance(v, dict):
-            replace(v, _replace_data)
-        elif isinstance(v, list):
-            for idx in range(len(v)):
-                if isinstance(v[idx], dict):
-                    replace(v[idx], _replace_data)
-                elif isinstance(v[idx], str):
-                    v[idx] = PATTERN.sub(lambda m: replacer(m, _replace_data), v[idx])
-        elif isinstance(v, str):
-            data[k] = PATTERN.sub(lambda m: replacer(m, _replace_data), v)
+    def _replace(data: Any) -> Any:
+        # nonlocal _replace_data, inplace
+
+        if isinstance(data, dict):
+            rd = data if inplace else {}  # pyright: ignore[reportUnknownVariableType]
+            for k, v in data.items():  # pyright: ignore[reportUnknownVariableType]
+                rd[k] = _replace(v)
+            return rd  # pyright: ignore[reportUnknownVariableType]
+        elif isinstance(data, list):
+            rl = (  # pyright: ignore[reportUnknownVariableType]
+                data if inplace else [*data]
+            )
+            for idx in range(len(data)):  # pyright: ignore[reportUnknownArgumentType]
+                rl[idx] = _replace(data[idx])
+            return rl  # pyright: ignore[reportUnknownVariableType]
+        elif isinstance(data, str):
+            return PATTERN.sub(lambda m: replacer(m, _replace_data), data)
+        else:
+            return data
+
+    result = _replace(data)
+    assert isinstance(result, dict)
+    return result  # pyright: ignore[reportUnknownVariableType]
 
 
 def replacer(match: re.Match[str], replace_data: Mapping[str, str]) -> str:
-    return replace_data.get(match.group(1), match.group(2))
+    key, default = match.group(1), match.group(2)
+
+    if key in replace_data:
+        return replace_data[key]
+    if default is not None:
+        return default
+    return ""
 
 
 def move_dir_contents(
