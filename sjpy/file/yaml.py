@@ -65,7 +65,7 @@ def read_yaml(
         raise FileNotFoundError(f"File {path} does not exist.")
     with path.open("r", encoding="utf-8") as file:
         config: dict[str, Any] = yaml.safe_load(file)
-    replace(config, replace_data)
+    config = replace(config, replace_data)
     return config
 
 
