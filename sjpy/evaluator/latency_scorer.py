@@ -1,12 +1,20 @@
-# Reference from https://github.com/facebookresearch/SimulEval.git
-
+# Derived from SimulEval:
+# https://github.com/facebookresearch/SimulEval
+# Source revision: abcdef123456...
+#
 # Copyright (c) Facebook, Inc. and its affiliates.
 # All rights reserved.
 #
-# This source code is licensed under the license found in the
-# LICENSE file in the root directory of this source tree.
-
-# MODIFIED FROM ORIGINAL
+# Original source licensed under the Creative Commons
+# Attribution-ShareAlike 4.0 International License.
+#
+# Modifications Copyright (c) 2026 SangJeong Kim
+# Modified from the original SimulEval implementation.
+#
+# SPDX-License-Identifier: CC-BY-SA-4.0
+#
+# See LICENSES/CC-BY-SA-4.0.txt for the full license text.
+# Source revision: 536de8253b82d805c9845440169a5010ff507357
 
 from collections.abc import Sequence
 
