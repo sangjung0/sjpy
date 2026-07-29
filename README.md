@@ -1,5 +1,5 @@
 <!-- Author: SangJeong Kim -->
-<!-- Last Modified: 2026-06-25 -->
+<!-- Last Modified: 2026-07-29 -->
 
 <div align="center">
   <h1> sjpy </h1>
@@ -54,6 +54,46 @@ pip install -e .
 ```
 
 Some audio utilities require `ffmpeg` to be available on the system path.
+
+## Use as a Git Submodule
+
+Add `sjpy` at the location expected by the parent project's `pyproject.toml`:
+
+```bash
+git submodule add https://github.com/sangjung0/sjpy.git modules/sjpy
+git submodule update --init --recursive
+```
+
+Declare the dependency and its local uv source in the parent project:
+
+```toml
+[project]
+dependencies = [
+    "sjpy",
+]
+
+[tool.uv.sources]
+sjpy = { path = "modules/sjpy", editable = true }
+```
+
+The source path must point to the submodule root containing `pyproject.toml`.
+
+## Development Container
+
+The optional development-only Dockerfile and Compose configuration live in
+`.devcontainer`. They provide the GPU-enabled VS Code development environment and
+are not runtime images for the library.
+
+Before opening the repository in a Dev Container:
+
+1. Copy `.env.example` to `.env`.
+2. Set `CONTAINER_VOLUME` and `AGENTS_PATH` to valid host directories.
+3. Confirm that the NVIDIA Container Toolkit is available.
+4. Run **Dev Containers: Reopen in Container** from VS Code.
+
+The checked-in `initializeCommand` uses the Windows host script. On a Linux host,
+enable the `initialize_command.sh` block in `.devcontainer/devcontainer.json`
+instead.
 
 ## License
 

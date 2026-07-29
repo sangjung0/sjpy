@@ -1,11 +1,11 @@
 import time
+from collections.abc import Generator
+from contextlib import contextmanager
+from typing import Any
+
 import numpy as np
 import numpy.typing as npt
-
-from typing import Any
-from contextlib import contextmanager
 from typing_extensions import deprecated
-from collections.abc import Generator
 
 from sjpy.statistics import summarize_distribution
 
@@ -105,7 +105,8 @@ class TimeEvaluatorSummary:
         self.aps: list[float | None] = []
 
     def add(
-        self, evaluator: TimeEvaluator  # pyright: ignore[reportDeprecated]
+        self,
+        evaluator: TimeEvaluator,  # pyright: ignore[reportDeprecated]
     ) -> None:
         self.times.extend(evaluator.times)
         self.als.append(evaluator.get_avg_lagging())

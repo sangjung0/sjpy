@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import os
-
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
-from collections.abc import Sequence
 
-from sjpy.reference import get_top_package_root
 from sjpy.file.yaml import read_yaml
+from sjpy.reference import get_top_package_root
 
 
 def load_config(

@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-
-from logging import Logger
-from typing import TypeVar, Any
 from collections.abc import Awaitable, Callable, Coroutine
+from logging import Logger
+from typing import Any, TypeVar
 
 from sjpy.excptn import exc_to_str
 

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import base64
+from typing import Any
+
 import numpy as np
 import numpy.typing as npt
-import base64
-
-from typing import Any
 
 
 def numpy_to_base64(array: npt.NDArray[Any]) -> str:

@@ -3,7 +3,7 @@
 
 {
 	"name": "sjpy_dev",
-	"dockerComposeFile": "../docker-compose.yml",
+	"dockerComposeFile": "docker-compose.yml",
 	"service": "service",
     "remoteUser": "root",
 	"workspaceFolder": "/workspaces/sjpy",
@@ -48,6 +48,8 @@
         "ms-toolsai.jupyter",
         // Python docstring 자동 생성기. 함수 정의 시 자동으로 docstring 삽입.
         "njpwerner.autodocstri",
+        // Python linter. 코드 품질 검사 및 스타일 가이드 준수 확인.
+        "charliermarsh.ruff",
         // Python - end
 
         // 기타 포매터

@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import time
-
-from contextlib import contextmanager
 from collections.abc import Generator
+from contextlib import contextmanager
 
-from sjpy.statistics import summarize_distribution, DistributionSummary
+from sjpy.statistics import DistributionSummary, summarize_distribution
 
 
 class TimeChecker:

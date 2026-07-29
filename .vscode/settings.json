@@ -36,6 +36,11 @@
     "**/log",
     "**/.venv"
   ],
+  "python.analysis.languageServerMode": "full",
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.indexing": true,
+  "python.analysis.includeAliasesFromUserFiles": true,
+  "python.analysis.importFormat": "absolute",
   "python-envs.defaultEnvManager": "ms-python.python:venv",
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
   "python.envFile": "${workspaceFolder}/.env",
@@ -56,8 +61,12 @@
   // Formatter
   "editor.formatOnSave": true,
   "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter",
-    "editor.tabSize": 4
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.tabSize": 4,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports.ruff": "explicit",
+      "source.fixAll.ruff": "explicit"
+    }
   },
   "[markdown]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",

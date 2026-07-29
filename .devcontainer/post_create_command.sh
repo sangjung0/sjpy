@@ -1,7 +1,8 @@
-# Author: SangJeong Kim
-# Last Modified: 2026-03-31
-
 #!/usr/bin/env bash
+
+# Author: SangJeong Kim
+# Last Modified: 2026-07-29
+
 set -euo pipefail
 
 CONTAINER_USER="${1:-$CONTAINER_USER}"

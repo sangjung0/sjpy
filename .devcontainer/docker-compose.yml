@@ -15,10 +15,14 @@ services:
         CONTAINER_UID: ${CONTAINER_UID}
         CONTAINER_HOME: ${CONTAINER_HOME}
     env_file:
-      - ./.env
+      - .env
+      - ../.env
     volumes:
-      - ./:${CONTAINER_WORK_DIR}
+      - ../:${CONTAINER_WORK_DIR}
       - venv:${CONTAINER_WORK_DIR}/.venv
+
+      # agents
+      - agents:${CONTAINER_WORK_DIR}/.agents:rw
 
       # cache
       - uv_cache:${CONTAINER_HOME}/.cache/uv:rw
@@ -40,3 +44,9 @@ volumes:
       type: none
       o: bind
       device: ${CONTAINER_VOLUME}/cache/uv
+  agents:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${AGENTS_PATH}

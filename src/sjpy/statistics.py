@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import math
-import numpy as np
-
-from typing import TypedDict
 from collections.abc import Sequence
+from typing import TypedDict
 
-from scipy.stats import skew, kurtosis
+import numpy as np
+from scipy.stats import kurtosis, skew
 
 
 class HistogramSummary(TypedDict):

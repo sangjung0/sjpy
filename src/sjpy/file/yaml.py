@@ -1,21 +1,22 @@
 from __future__ import annotations
 
-import json
-
-from typing import Any
 from collections.abc import Mapping
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+import yaml
 
 from sjpy.collection import to_namespace
+from sjpy.file.algorithm import replace
 
 Metadata = object
 Data = dict[str, Any]
 
 
-class JsonSaver:
+class YamlSaver:
     def __init__(self, description: str):
-        self.description: str = description
+        self.description = description
 
     def _get_current_time_dict(self) -> dict[str, int]:
         now = datetime.now()
@@ -30,10 +31,8 @@ class JsonSaver:
         }
 
     def save(
-        self, data: Mapping[str, Any], filepath: Path | str, verbose: bool = True
+        self, data: Mapping[Any, Any], filepath: Path, verbose: bool = True
     ) -> None:
-        filepath = Path(filepath)
-
         output: dict[str, Any] = {
             "metadata": {
                 "description": self.description,
@@ -48,25 +47,36 @@ class JsonSaver:
             print(f"File {filepath} already exists. Overwriting...")
 
         with filepath.open("w", encoding="utf-8") as f:
-            json.dump(output, f, ensure_ascii=False, indent=4)
+            yaml.dump(output, f, allow_unicode=True, sort_keys=False)
 
 
-def load_json(filepath: Path) -> tuple[Metadata, Data]:
-    data = read_json(filepath)
+def load_yaml(filepath: Path | str) -> tuple[Metadata, Data]:
+    filepath = Path(filepath)
+    data = read_yaml(filepath)
     metadata = to_namespace(data["metadata"])
     return metadata, data["data"]
 
 
-def read_json(path: Path) -> dict[str, Any]:
-    # 왜만들었지
+def read_yaml(
+    path: Path | str, replace_data: Mapping[str, str] | None = None
+) -> dict[str, Any]:
+    path = Path(path)
     if not path.exists():
         raise FileNotFoundError(f"File {path} does not exist.")
-    data: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
-    return data
+    with path.open("r", encoding="utf-8") as file:
+        config: dict[str, Any] = yaml.safe_load(file)
+    config = replace(config, replace_data)
+    return config
+
+
+def read_yaml_namespace(path: Path | str) -> object:
+    config = read_yaml(path)
+    return to_namespace(config)
 
 
 __all__ = [
-    "JsonSaver",
-    "load_json",
-    "read_json",
+    "YamlSaver",
+    "load_yaml",
+    "read_yaml",
+    "read_yaml_namespace",
 ]

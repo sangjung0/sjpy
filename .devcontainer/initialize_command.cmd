@@ -13,7 +13,7 @@ if "%~1"=="" (
 set "CONTAINER_WORK_DIR=%~1"
 
 if not exist "%CONTAINER_WORK_DIR%\.devcontainer\sjsh" (
-    git clone --branch v0.0.6 https://github.com/sangjung0/sjsh.git ^
+    git clone --branch v0.0.7 https://github.com/sangjung0/sjsh.git ^
         "%CONTAINER_WORK_DIR%\.devcontainer\sjsh"
 )
 

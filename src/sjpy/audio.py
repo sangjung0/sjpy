@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
-import ffmpeg
 import io
-import warnings
-import tempfile
 import subprocess
+import tempfile
+import warnings
+from types import ModuleType
+from typing import Any, cast
+
+import ffmpeg
 import numpy as np
 import numpy.typing as npt
 import soundfile as sf
-
-from types import ModuleType
-from typing import Any, cast
 from scipy.io import wavfile
 from scipy.signal import resample_poly
 

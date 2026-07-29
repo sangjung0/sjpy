@@ -1,19 +1,19 @@
 from __future__ import annotations
 
-import os
-import time
 import gc
-import threading
-import psutil
 import multiprocessing as mp
-
-from typing import TypedDict
-from multiprocessing import synchronize
+import os
+import threading
+import time
 from contextlib import ContextDecorator
-from queue import Queue
 from logging import Logger
+from multiprocessing import synchronize
+from queue import Queue
+from typing import TypedDict
 
-from sjpy.logger import generate
+import psutil
+
+from sjpy.logger import configure_logger
 
 
 class RssUss(TypedDict):
@@ -107,7 +107,7 @@ class MemScope(ContextDecorator):
         assert backend in ("process", "thread")
 
         if logger is None:
-            logger = generate(__name__)
+            logger = configure_logger(__name__)
 
         self.logger: Logger = logger
         self.sample_ms: int = sample_ms
